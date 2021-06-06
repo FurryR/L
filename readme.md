@@ -99,7 +99,7 @@ You can use **const<...>** to make sure a literal has const attribute.
 These commands are the basic L interpreter supports.
 tips:\[required\] \(optional=default\)
 **var \[name\]\(,value=null\)** : Defines \[name\] \(to value\) \(if \(value\) is not specified,it will default to null\(is not const value\).
-sample\[2\]:
+sample\[1\]:
 
 ```
 var z;#After this,variable 'z' will be null(is not const value).
