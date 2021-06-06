@@ -638,6 +638,7 @@ namespace L{
             Variable::var res;
             if(exp.tp!=Variable::var_tp::Expression){
                 if(exp.tp==Variable::var_tp::Object||exp.tp==Variable::var_tp::Array){
+                        bool ret_const=exp.isConst;
                         switch((size_t)exp.tp){
                             case Variable::var_tp::Object:{
                                 std::map<std::string,Variable::var> x;
@@ -647,7 +648,7 @@ namespace L{
                                     x[i->first]=exp_calc(i->second,scope,all_scope,this_scope);//calc values of the object
                                     x[i->first].isConst=flag;
                                 }
-                                return Variable::var(x);
+                                return Variable::var(x,ret_const);
                             }
                             case Variable::var_tp::Array:{
                                 std::vector<Variable::var> x(exp.ArrayValue.size());
@@ -655,7 +656,7 @@ namespace L{
                                     x[i]=exp_calc(exp.ArrayValue[i],scope,all_scope,this_scope);//calc members of the array
                                     x[i].isConst=false;
                                 }
-                                return Variable::var(x);
+                                return Variable::var(x,ret_const);
                             }
                         }
                 }else return exp;
