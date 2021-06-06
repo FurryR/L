@@ -731,6 +731,7 @@ namespace L{
                 Variable::var x;
                 try{
                     x=exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope);
+                    x.isConst=true;
                 }catch(...){
                     return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
                 }
@@ -1073,7 +1074,7 @@ namespace L{
                             return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
                         }
                     }else if(member=="toString"){
-                        ret=fn_native.getConstParent().toString_nonconst();
+                        ret=Variable::var(fn_native.getConstParent().toString_nonconst());
                     }else if(member=="insert"){
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
@@ -1096,12 +1097,13 @@ namespace L{
                             return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                         }
                     }
+                    ret.isConst=true;
                     if(args.size()==3){
-                        ret.isConst=false;
                         try{
                             Return_Object x=get_object(args[2],scope,all_scope,this_scope);
                             if(x.tp!=is_pointer||x.getValue().isConst==true)throw 0;
                             x.getValue()=ret;
+                            x.getValue().isConst=false;
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
                         }
@@ -1123,12 +1125,13 @@ namespace L{
                         Return_Value res;
                         res=L(func.FunctionValue.value[i]).eval(temp_scope,all_scope,*parent);
                         if(res.tp==Function_Return_Value){
+                            res.value.isConst=true;
                             if(args.size()==3){
-                                res.value.isConst=false;
                                 try{
                                     Return_Object x=get_object(args[2],scope,all_scope,this_scope);
                                     if(x.tp!=is_pointer||x.getValue().isConst==true)throw 0;
                                     x.getValue()=res.value;
+                                    x.getValue().isConst=false;
                                 }catch(...){
                                     return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
                                 }
@@ -1147,6 +1150,7 @@ namespace L{
                 Variable::var x;
                 try{
                     x=exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope);
+                    x.isConst=true;
                 }catch(...){
                     return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                 }
