@@ -1,0 +1,13 @@
+#zh_CN.UTF-8
+lpp_title:"L语言 {0} 简体中文版"
+lpp_usage_information:"使用：using:lpp (langfile=langfile) [--help/help/terminal/file=(filename)] (arguments)..."
+lpp_usage_argument_langfile:"langfile : 选择言语文件。"
+lpp_usage_argument_help:"help/--help 表示帮助信息。"
+lpp_usage_argument_terminal:"terminal 启动终端。"
+lpp_usage_argument_file:"file 解释脚本。"
+lpp_failed_open_file:"{0} 文件读取失败。"
+lpp_loading_terminal:"载入中......"
+lpp_terminal_welcome:"欢迎！输入’.debug’来表示变量表。输入’.exit’终止程序。"
+lpp_variable_list:"变量表："
+lpp_unknown_internal_stmt:"不明的内部语句。确认拼写后，再试一次。"
+lpp_throw:"    {0} -> {1}\n[x]未预期的 {2} 错误。"

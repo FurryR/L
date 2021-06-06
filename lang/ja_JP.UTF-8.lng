@@ -1,0 +1,13 @@
+#ja_JP.UTF-8
+lpp_title:"L　インタプリタ　{0}　日本語版"
+lpp_usage_information:"使う：using:lpp (langfile=langfile) [--help/help/terminal/file=(filename)] (arguments)..."
+lpp_usage_argument_langfile:"langfile : 言語ファイルを選択する。"
+lpp_usage_argument_help:"help/--help ヘルプを表示する。"
+lpp_usage_argument_terminal:"terminal ターミナルを開始する。"
+lpp_usage_argument_file:"file 脚本を解釈する。"
+lpp_failed_open_file:"{0} ファイルを読み取りするが失敗しました。"
+lpp_loading_terminal:"読み込み中…"
+lpp_terminal_welcome:"ようこそ！’.debug’を入力して変数表を表示する。’.exit’を入力してプログラムを終了する。"
+lpp_variable_list:"変数表："
+lpp_unknown_internal_stmt:"不明な内部ステートメント。スペルを確認したら、もう一度やり直してください。"
+lpp_throw:"    {0} -> {1}\n[x]予期外の　{2}　エラー。"
