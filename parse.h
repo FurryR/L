@@ -382,6 +382,26 @@ namespace L{
                         }
                         now_const_object=Variable::parse("(default parse)");
                         fin=is_native_function;
+                    }else if(visit[i]=="_substr_"){
+                        switch(fin){
+                            case is_pointer:{
+                                if(now_object->tp!=Variable::var_tp::String)throw member_not_exist;
+                                parent_object=now_object;
+                                isConst=false;
+                                break;
+                            }
+                            case is_const_value:{
+                                if(now_const_object.tp!=Variable::var_tp::String)throw member_not_exist;
+                                parent_const_object=now_const_object;
+                                isConst=true;
+                                break;
+                            }
+                            case is_native_function:{
+                                throw member_not_exist;
+                            }
+                        }
+                        now_const_object=Variable::parse("(default substr)");
+                        fin=is_native_function;
                     }else if(visit[i]=="_join_"){
                         switch(fin){
                             case is_pointer:{
@@ -1028,13 +1048,28 @@ namespace L{
                         if(res.tp!=Expression_Calc_Value){
                             return res;
                         }else ret=res.value;
-                    }if(member=="parse"){
+                    }else if(member=="parse"){
                         try{
                             ret=exp_calc(fn_native.getConstParent().StringValue,scope,all_scope,this_scope);
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                         }
-                    }if(member=="join"){
+                    }else if(member=="substr"){
+                        if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
+                        try{
+                            Variable::var op=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
+                            if(op.tp!=Variable::var_tp::Array||op.ArrayValue.size()<1||op.ArrayValue.size()>2||op.ArrayValue[0].tp!=Variable::var_tp::Int)throw 0;
+                            if(op.ArrayValue[0].IntValue<0)ret="";
+                            else if(op.ArrayValue.size()==1)ret=fn_native.getConstParent().StringValue.substr((size_t)op.ArrayValue[0].IntValue);
+                            else if(op.ArrayValue.size()==2){
+                                if(op.ArrayValue[1].tp!=Variable::var_tp::Int)throw 0;
+                                else if(op.ArrayValue[1].IntValue<0)ret="";
+                                else ret=fn_native.getConstParent().StringValue.substr((size_t)op.ArrayValue[0].IntValue,(size_t)op.ArrayValue[1].IntValue);
+                            }
+                        }catch(...){
+                            return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
+                        }
+                    }else if(member=="join"){
                         try{
                             if(args.size()<2)throw 0;
                             Variable::var sp;
@@ -1049,7 +1084,6 @@ namespace L{
                             return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         }
                     }else if(member=="pop"){
-                        if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
                             if(fn_native.getParent().ArrayValue.empty())throw 0;
                             fn_native.getParent().ArrayValue.pop_back();
@@ -1192,6 +1226,7 @@ namespace L{
             }else if(name=="break"||name=="continue"||name=="default"){
                 return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
             }
+            //else if...your codes here.
             try{
                 return Return_Value(*this,Expression_Calc_Value,exp_calc(Variable::parse(toString()),scope,all_scope,this_scope),scope,all_scope,this_scope);
             }catch(...){
