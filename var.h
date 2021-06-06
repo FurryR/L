@@ -257,7 +257,7 @@ namespace Variable{
             if(x[i]=='"'&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
             if(x[i]=='\''&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
             if((x[i]=='\r'||x[i]=='\n'||x[i]=='\t')&&a==0)continue;
-            else if(x[i]==' '&&a==0&&(i<=0||(!((tmp[i-1]>='a'&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||(tmp[i-1]>='0'&&tmp[i-1]<='9'))))){
+            else if(x[i]==' '&&a==0&&(i<=0||(!((tmp[i-1]>='a'&&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||(tmp[i-1]>='0'&&tmp[i-1]<='9'))))){
                 //if(i<=0)continue;
                 //if((x[i-1]>='a'||x[i-1]<='z')&&(x[i-1]>='A'||x[i-1]<='Z'))tmp+=x[i];
                 continue;
