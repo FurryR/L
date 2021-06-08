@@ -1074,10 +1074,12 @@ namespace L{
                             if(args.size()<2)throw 0;
                             Variable::var sp;
                             ret.tp=Variable::var_tp::String;
-                            sp=exp_calc(args[1],scope,all_scope,this_scope);
+                            sp=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
                             if(sp.tp!=Variable::var_tp::String)throw 0;
                             for(size_t i=0;i<fn_native.getConstParent().ArrayValue.size();i++){
-                                if(i+1!=fn_native.getConstParent().ArrayValue.size())ret.StringValue+=fn_native.getConstParent().ArrayValue[i].toString_nonconst()+sp.StringValue;
+                                if(i+1!=fn_native.getConstParent().ArrayValue.size()){
+                                    ret.StringValue+=fn_native.getConstParent().ArrayValue[i].toString_nonconst()+sp.StringValue;
+                                }
                                 else ret.StringValue+=fn_native.getConstParent().ArrayValue[i].toString_nonconst();
                             }
                         }catch(...){
