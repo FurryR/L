@@ -244,20 +244,20 @@ namespace Variable{
     }
     std::string Unicode2String(const std::string& str){
         if(str=="")return "";
-        std::wstring m(1,Hex2Dec("0x"+str));
+        std::wstring m(2,Hex2Dec("0x"+str));
         #ifdef FORCE_UTF8
         return std::wstring_convert< std::codecvt_utf8<wchar_t> >().to_bytes(m);
         #else
         std::string ret;
         try{
-            ret=std::string(m.length()*std::use_facet< std::codecvt<wchar_t,char,std::mbstate_t> >(std::locale("")).max_length(),'\0');
+            ret=std::string(m.length()*std::use_facet< std::codecvt<wchar_t,char,std::mbstate_t> >(std::locale("")).max_length()+1,'\0');
         }catch(...){
             return "?";
         }
         mbstate_t mb;
-        const wchar_t* from_next;
-        char* to_next;
-        if(std::use_facet< std::codecvt<wchar_t,char,std::mbstate_t> >(std::locale("")).out(mb,&m[0],&m[m.size()],from_next,&ret[0],&ret[ret.size()],to_next)!=std::codecvt_base::result::ok)return "?";
+        const wchar_t* from_next=nullptr;
+        char* to_next=nullptr;
+        if(std::use_facet< std::codecvt<wchar_t,char,std::mbstate_t> >(std::locale("")).out(mb,&m[0],&m[m.size()-1],from_next,&ret[0],&ret[ret.size()-1],to_next)!=std::codecvt_base::result::ok)return "?";
         ret.resize(to_next-&ret[0]);
         return ret;
         #endif
@@ -409,10 +409,15 @@ namespace Variable{
                                 tmp+="\\n";
                                 break;
                             }
-                            case '\\':
-                            case '\'':
+                            case '\\':{
+                                tmp+="\\\\";
+                                break;
+                            }
+                            case '\'':{
+                                tmp+="\\\'";
+                            }
                             case '"':{
-                                tmp+="\\"+StringValue[i];
+                                tmp+="\\\"";
                                 break;
                             }
                             default:{
