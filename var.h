@@ -11,6 +11,7 @@ FORCE_UTF8 : converts Unicode to UTF-8 by force.
 #include<vector>
 #include<map>
 #include<locale>
+#include<string>
 #ifdef FORCE_UTF8
 #include<codecvt>
 #endif
@@ -168,7 +169,7 @@ namespace Variable{
                             ret.push_back(temp);
                             temp="";
                         }
-                        ret.push_back(std::string({p[i]}));
+                        ret.push_back(std::string(1,p[i]));
                     }else temp+=p[i];
                     break;
                 }
@@ -221,10 +222,20 @@ namespace Variable{
                 }
             }
         }
-        if(f!=0)throw p;
-        if(a!=0)throw p;
+        if(f!=0)throw 0;
+        if(a!=0)throw 0;
         if(temp!="")ret.push_back(temp);
         return ret;
+    }
+    bool isExpression(const std::string& p){
+        bool flag=false;
+        for(size_t i=0,j=0,a=0;i<p.length();i++){
+            if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
+            if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+            if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
+            else if(get_op_priority(std::string(1,p[i]))!=-1&&a==0&&j==0)flag=true;
+        }
+        return flag;
     }
     int Hex2Dec(const std::string& m){
         int l;
@@ -257,7 +268,7 @@ namespace Variable{
             if(x[i]=='"'&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
             if(x[i]=='\''&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
             if((x[i]=='\r'||x[i]=='\n'||x[i]=='\t')&&a==0)continue;
-            else if(x[i]==' '&&a==0&&(i<=0||(!((tmp[i-1]>='a'&&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||(tmp[i-1]>='0'&&tmp[i-1]<='9'))))){
+            else if(x[i]==' '&&a==0&&(i<=0||(tmp[i-1]=='('||tmp[i-1]=='['||tmp[i-1]=='{'||tmp[i-1]==' '))&&(i<=0||!((tmp[i-1]>='a'&&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||(tmp[i-1]>='0'&&tmp[i-1]<='9')))){
                 //if(i<=0)continue;
                 //if((x[i-1]>='a'||x[i-1]<='z')&&(x[i-1]>='A'||x[i-1]<='Z'))tmp+=x[i];
                 continue;
@@ -398,16 +409,10 @@ namespace Variable{
                                 tmp+="\\n";
                                 break;
                             }
+                            case '\\':
+                            case '\'':
                             case '"':{
-                                tmp+="\\\"";
-                                break;
-                            }
-                            case '\'':{
-                                tmp+="\\\'";
-                                break;
-                            }
-                            case '\e':{
-                                tmp+="\\e";
+                                tmp+="\\"+StringValue[i];
                                 break;
                             }
                             default:{
@@ -452,24 +457,24 @@ namespace Variable{
         var convert(const var_tp& type) const{
             if(tp==type)return *this;
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     switch(type){
-                        case var_tp::Boolean:{
+                        case Boolean:{
                             return var((bool)IntValue);
                         }
                         default:throw "failed";
                     }
                     break;
                 }
-                case var_tp::Boolean:{
+                case Boolean:{
                     switch(type){
-                        case var_tp::Int:return var((int)BooleanValue);
+                        case Int:return var((int)BooleanValue);
                         default:throw "failed";
                     }
                 }
-                case var_tp::String:{
+                case String:{
                     switch(type){
-                        case var_tp::Array:{
+                        case Array:{
                             std::vector<var> ret;
                             for(size_t i=0;i<StringValue.length();i++){
                                 ret.push_back(var(std::string(1,StringValue[i])));
@@ -480,9 +485,9 @@ namespace Variable{
                     }
                     break;
                 }
-                case var_tp::Array:{
+                case Array:{
                     switch(type){
-                        case var_tp::Object:{
+                        case Object:{
                             std::map<std::string,var> ret;
                             for(size_t i=0;i<ArrayValue.size();i++){
                                 ret[std::to_string(i)]=ArrayValue[i];
@@ -493,9 +498,9 @@ namespace Variable{
                     }
                     break;
                 }
-                case var_tp::Null:
-                case var_tp::Function:
-                case var_tp::Object:{
+                case Null:
+                case Function:
+                case Object:{
                     throw "failed";
                 }
                 default:throw "failed";
@@ -506,14 +511,14 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var(IntValue+op.IntValue);
                 }
-                case var_tp::String:{
+                case String:{
                     return var(StringValue+op.StringValue);
                 }
-                case var_tp::Array:{
-                    ret.tp=var_tp::Array;
+                case Array:{
+                    ret.tp=Array;
                     ret.ArrayValue=ArrayValue;
                     for(size_t i=0;i<op.ArrayValue.size();i++){
                         ret.ArrayValue.push_back(op.ArrayValue[i]);
@@ -529,7 +534,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var(IntValue-op.IntValue);
                 }
                 default:{
@@ -541,7 +546,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var(IntValue*op.IntValue);
                 }
                 default:{
@@ -553,7 +558,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var(IntValue/op.IntValue);
                 }
                 default:{
@@ -565,7 +570,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var((int)IntValue%(int)op.IntValue);
                 }
                 default:{
@@ -577,7 +582,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var((int)IntValue&(int)op.IntValue);
                 }
                 default:{
@@ -589,7 +594,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var((int)IntValue|(int)op.IntValue);
                 }
                 default:{
@@ -601,7 +606,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var((int)IntValue^(int)op.IntValue);
                 }
                 default:{
@@ -611,7 +616,7 @@ namespace Variable{
         }
         var operator~(){
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var(~(int)IntValue);
                 }
                 default:{
@@ -623,7 +628,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     if(op.IntValue>=32)return var((int)IntValue);else return var((int)IntValue<<(int)op.IntValue);
                 }
                 default:{
@@ -635,7 +640,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     if(op.IntValue>=32)return var((int)IntValue);else return var((int)IntValue>>(int)op.IntValue);
                 }
                 default:{
@@ -647,7 +652,7 @@ namespace Variable{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
-                case var_tp::Int:{
+                case Int:{
                     return var(double((unsigned int)IntValue>>(unsigned int)op.IntValue));
                 }
                 default:{
@@ -663,26 +668,26 @@ namespace Variable{
             }
             const var op=opx.convert(tp);
             switch((size_t)op.tp){
-                case var_tp::Int:{
+                case Int:{
                     return op.IntValue==IntValue;
                 }
-                case var_tp::Null:{
+                case Null:{
                     return true;
                 }
-                case var_tp::Boolean:{
+                case Boolean:{
                     return op.BooleanValue==BooleanValue;
                 }
-                case var_tp::String:{
+                case String:{
                     return op.StringValue==StringValue;
                 }
-                case var_tp::Array:{
+                case Array:{
                     if(op.ArrayValue.size()!=ArrayValue.size())return false;
                     for(size_t i=0;i<op.ArrayValue.size();i++){
                         if(var(op.ArrayValue[i])!=var(ArrayValue[i]))return false;
                     }
                     return true;
                 }
-                case var_tp::Object:{
+                case Object:{
                     for(std::map<std::string,var>::const_iterator i=op.ObjectValue.begin();i!=op.ObjectValue.end();i++){
                         try{
                             if(var(((std::map<std::string,var>)ObjectValue).at(i->first))!=var(i->second))return false;
@@ -692,7 +697,7 @@ namespace Variable{
                     }
                     return true;
                 }
-                case var_tp::Function:{
+                case Function:{
                     if(FunctionValue.value.size()!=op.FunctionValue.value.size())return false;
                     for(size_t i=0;i<FunctionValue.value.size();i++){
                         if(FunctionValue.value[i]!=op.FunctionValue.value[i])return false;
@@ -713,10 +718,10 @@ namespace Variable{
             }
             const var op=opx.convert(tp);
             switch(op.tp){
-                case var_tp::Int:{
+                case Int:{
                     return IntValue>op.IntValue;
                 }
-                case var_tp::String:{
+                case String:{
                     return StringValue>op.StringValue;
                 }
                 default:{
@@ -741,8 +746,8 @@ namespace Variable{
             return (operator==(var(1)))||(op==var(1));
         }
         bool operator!(){
-            if(tp==var_tp::Boolean||tp==var_tp::Int){
-                if(tp==var_tp::Boolean)return !BooleanValue;
+            if(tp==Boolean||tp==Int){
+                if(tp==Boolean)return !BooleanValue;
                 else return !(bool)IntValue;
             }
             return false;
@@ -780,17 +785,7 @@ namespace Variable{
         }
         if(p=="")return var(nullptr,isc);
         try{
-            if(splitExpression(p).size()==1)throw 0;
-            if(p[0]=='('&&p[p.length()-1]==')'){
-                size_t i=0;
-                for(size_t j=0,a=0;i<p.length();i++){
-                    if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                    if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
-                    if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-                    if(p[i]==')'&&a==0&&j==0)break;
-                }
-                if(i==p.length()-1)throw 0;
-            }
+            if(isExpression(p)==false)throw 0;
         }catch(...){
             try{
                 for(size_t i=0,a=0,j=0;i<p.length();i++){
@@ -806,7 +801,7 @@ namespace Variable{
                 else std::stoi(p,0,0);
             }catch(...){
                 if(p=="null")return var(nullptr,isc);
-                if(p=="true"||p=="false")return var(bool(p=="true"),isc);
+                if(p=="true"||p=="false")return var(p=="true",isc);
                 if((p[0]=='\"'&&p[p.length()-1]=='\"')||(p[0]=='\''&&p[p.length()-1]=='\'')){
                     std::string tmp=p.substr(1,p.length()-2),ret="";
                     for(size_t i=0;i<tmp.length();i++){
@@ -853,44 +848,35 @@ namespace Variable{
                     }
                     return var(ret,isc);
                 }
-                if(p[0]=='['&&p[p.length()-1]==']'){
-                    std::string tmp="";
-                    std::vector<var> tmp2;
-                    for(size_t i=1,j=0,a=0;i<p.length()-1;i++){
-                        if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                        if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
-                        if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-                        if(p[i]==','&&j==0&&a==0)tmp2.push_back(parse(tmp)),tmp="";else tmp+=p[i];
-                    }
-                    if(tmp!="")tmp2.push_back(parse(tmp,false,true));
-                    return var(tmp2,isc);
-                }
-                if(p[0]=='{'&&p[p.length()-1]=='}'){
+                if((p[0]=='{'||p[0]=='[')&&(p[p.length()-1]=='}'||p[p.length()-1]==']')){
                     std::string key="",value="";
                     std::map<std::string,var> ret;
+                    std::vector<var> ret2;
+                    bool isobject=(p[0]=='{');
                     for(size_t i=1,a=0;i<p.length()-1;i++){
-                        for(;i<p.length()-1;i++){
-                            if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                            if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
-                            if((p[i]=='"'||p[i]=='\'')&&(p[i-1]!='{'||p[i-1]!=',')&&a==0){
-                                key+=p[i++];
-                                break;
+                        if(isobject){
+                            for(;i<p.length()-1;i++){
+                                if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
+                                if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+                                if((p[i]=='"'||p[i]=='\'')&&(p[i-1]!='{'||p[i-1]!=',')&&a==0){
+                                    key+=p[i++];
+                                    break;
+                                }
+                                key+=p[i];
                             }
-                            key+=p[i];
+                            i++;//: token
                         }
-                        key=parse(key).StringValue;
-                        i++;
                         for(size_t j=0;i<p.length()-1;i++){
                             if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
                             if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
                             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
                             if(p[i]==','&&j==0&&a==0)break;else value+=p[i];
                         }
-                        ret[key]=parse(value);
+                        if(isobject)ret[parse(key).StringValue]=parse(value);else ret2.push_back(parse(value));
                         key="";
                         value="";
                     }
-                    return var(ret,isc);
+                    if(isobject)return var(ret,isc);else return var(ret2,isc);
                 }
                 if(p[0]=='('&&p[p.length()-1]==')')return var(Fn_temp(code_split(p.substr(1,p.length()-2))),isc);
                 return var(genExpression(splitExpression(p)),isc);

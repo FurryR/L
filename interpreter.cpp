@@ -125,14 +125,14 @@ int main(int argc,char** argv){
             return 1;
         }
         Variable::var var_arg(nullptr,true);
-        var_arg.tp=Variable::var_tp::Array;
+        var_arg.tp=Variable::Array;
         var_arg.ArrayValue=std::vector<Variable::var>(program_arg.size());
         for(size_t i=0;i<program_arg.size();i++){
             var_arg.ArrayValue[i]=Variable::var(program_arg[i],false);
         }
         Variable::var f;
         f.isConst=false;
-        f.tp=Variable::var_tp::Object;
+        f.tp=Variable::Object;
         f.ObjectValue["arguments"]=var_arg;
         while(!s.eof()){
             std::string m,cm;
@@ -169,7 +169,7 @@ int main(int argc,char** argv){
                     return 1;
                 }else if(x.tp==L::L::Return_Type::Function_Return_Value){
                     try{
-                        x.value=x.value.convert(Variable::var_tp::Int);
+                        x.value=x.value.convert(Variable::Int);
                         return (int)x.value.IntValue;
                     }catch(...){
                         return 0;
@@ -183,7 +183,7 @@ int main(int argc,char** argv){
         std::cout<<strmap["lpp_terminal_welcome"].format()<<std::endl;
         Variable::var f;
         f.isConst=false;
-        f.tp=Variable::var_tp::Object;
+        f.tp=Variable::Object;
         while(!std::cin.eof()){
             std::string m,cm;
             std::cout<<">>> "<<std::flush;

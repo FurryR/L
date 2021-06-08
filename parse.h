@@ -82,13 +82,12 @@ namespace L{
         } Return_Value;
         Return_Value eval(Variable::var scope){
             scope.isConst=false;
-            scope.tp=Variable::var_tp::Object;
+            scope.tp=Variable::Object;
             return eval(scope,scope,scope);
         }
         L(){}
         L(const std::string& x){
             std::string p;
-            if(x==""||x[0]=='#')return;
             for(size_t i=0,a=0;i<x.length();i++){
                 if(i==0)while(x[i]==' ')i++;
                 if(x[i]=='"'&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
@@ -277,7 +276,7 @@ namespace L{
                                 break;
                             }
                             case is_native_function:{
-                                now_const_object=Variable::var(Variable::getTypeStr(Variable::var_tp::Function));
+                                now_const_object=Variable::var(Variable::getTypeStr(Variable::Function));
                                 break;
                             }
                         }
@@ -286,12 +285,12 @@ namespace L{
                         now_const_object.ArrayValue.clear();
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Object)throw member_not_exist;
+                                if(now_object->tp!=Variable::Object)throw member_not_exist;
                                 for(std::map<std::string,Variable::var>::iterator x=now_object->ObjectValue.begin();x!=now_object->ObjectValue.end();x++)if(x->first[0]!='_')now_const_object.ArrayValue.push_back(Variable::var(x->first,false));
                                 break;
                             }
                             case is_const_value:{
-                                if(now_const_object.tp!=Variable::var_tp::Object)throw member_not_exist;
+                                if(now_const_object.tp!=Variable::Object)throw member_not_exist;
                                 for(std::map<std::string,Variable::var>::iterator x=now_const_object.ObjectValue.begin();x!=now_const_object.ObjectValue.end();x++)if(x->first[0]!='_')now_const_object.ArrayValue.push_back(Variable::var(x->first,false));
                                 break;
                             }
@@ -299,13 +298,13 @@ namespace L{
                                 throw member_not_exist;
                             }
                         }
-                        now_const_object.tp=Variable::var_tp::Array;
+                        now_const_object.tp=Variable::Array;
                         fin=is_const_value;
                     }else if(visit[i]=="_length_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Array&&now_object->tp!=Variable::var_tp::String)throw member_not_exist;
-                                if(now_object->tp==Variable::var_tp::Array){
+                                if(now_object->tp!=Variable::Array&&now_object->tp!=Variable::String)throw member_not_exist;
+                                if(now_object->tp==Variable::Array){
                                     now_const_object=Variable::var((int)now_object->ArrayValue.size());
                                 }else{
                                     now_const_object=Variable::var((int)now_object->StringValue.length());
@@ -313,8 +312,8 @@ namespace L{
                                 break;
                             }
                             case is_const_value:{
-                                if(now_const_object.tp!=Variable::var_tp::Array&&now_const_object.tp!=Variable::var_tp::String)throw member_not_exist;
-                                if(now_const_object.tp==Variable::var_tp::Array){
+                                if(now_const_object.tp!=Variable::Array&&now_const_object.tp!=Variable::String)throw member_not_exist;
+                                if(now_const_object.tp==Variable::Array){
                                     now_const_object=Variable::var((int)now_const_object.ArrayValue.size());
                                 }else{
                                     now_const_object=Variable::var((int)now_const_object.StringValue.length());
@@ -345,13 +344,13 @@ namespace L{
                     }else if(visit[i]=="_eval_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::String)throw member_not_exist;
+                                if(now_object->tp!=Variable::String)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 break;
                             }
                             case is_const_value:{
-                                if(now_const_object.tp!=Variable::var_tp::String)throw member_not_exist;
+                                if(now_const_object.tp!=Variable::String)throw member_not_exist;
                                 parent_const_object=now_const_object;
                                 isConst=true;
                                 break;
@@ -365,13 +364,13 @@ namespace L{
                     }else if(visit[i]=="_parse_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::String)throw member_not_exist;
+                                if(now_object->tp!=Variable::String)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 break;
                             }
                             case is_const_value:{
-                                if(now_const_object.tp!=Variable::var_tp::String)throw member_not_exist;
+                                if(now_const_object.tp!=Variable::String)throw member_not_exist;
                                 parent_const_object=now_const_object;
                                 isConst=true;
                                 break;
@@ -385,13 +384,13 @@ namespace L{
                     }else if(visit[i]=="_substr_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::String)throw member_not_exist;
+                                if(now_object->tp!=Variable::String)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 break;
                             }
                             case is_const_value:{
-                                if(now_const_object.tp!=Variable::var_tp::String)throw member_not_exist;
+                                if(now_const_object.tp!=Variable::String)throw member_not_exist;
                                 parent_const_object=now_const_object;
                                 isConst=true;
                                 break;
@@ -405,13 +404,13 @@ namespace L{
                     }else if(visit[i]=="_join_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Array)throw member_not_exist;
+                                if(now_object->tp!=Variable::Array)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 break;
                             }
                             case is_const_value:{
-                                if(now_const_object.tp!=Variable::var_tp::Array)throw member_not_exist;
+                                if(now_const_object.tp!=Variable::Array)throw member_not_exist;
                                 parent_const_object=now_const_object;
                                 isConst=true;
                                 break;
@@ -425,7 +424,7 @@ namespace L{
                     }else if(visit[i]=="_pop_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Array)throw member_not_exist;
+                                if(now_object->tp!=Variable::Array)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 now_const_object=Variable::parse("(default pop)");
@@ -440,7 +439,7 @@ namespace L{
                     }else if(visit[i]=="_push_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Array)throw member_not_exist;
+                                if(now_object->tp!=Variable::Array)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 now_const_object=Variable::parse("(default push)");
@@ -455,7 +454,7 @@ namespace L{
                     }else if(visit[i]=="_insert_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Array)throw member_not_exist;
+                                if(now_object->tp!=Variable::Array)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 now_const_object=Variable::parse("(default insert)");
@@ -470,7 +469,7 @@ namespace L{
                     }else if(visit[i]=="_resize_"){
                         switch(fin){
                             case is_pointer:{
-                                if(now_object->tp!=Variable::var_tp::Array)throw member_not_exist;
+                                if(now_object->tp!=Variable::Array)throw member_not_exist;
                                 parent_object=now_object;
                                 isConst=false;
                                 now_const_object=Variable::parse("(default resize)");
@@ -517,7 +516,7 @@ namespace L{
                 }else{//normal member
                     Variable::var visit_temp=exp_calc(Variable::parse(visit[i]),scope,all_scope,*this_object);
                     std::string find_str;
-                    if(visit_temp.tp==Variable::var_tp::String)find_str=visit_temp.StringValue;
+                    if(visit_temp.tp==Variable::String)find_str=visit_temp.StringValue;
                     else find_str=visit_temp.toString_nonconst();
                     if(find_str[0]=='_'&&!this_keep)throw member_cant_visit;
                     if(find_str=="this"){
@@ -533,8 +532,8 @@ namespace L{
                         case is_pointer:{
                             this_object=now_object;
                             switch(now_object->tp){
-                                case Variable::var_tp::String:{
-                                    if(visit_temp.tp!=Variable::var_tp::Int){
+                                case Variable::String:{
+                                    if(visit_temp.tp!=Variable::Int){
                                         now_const_object=Variable::var();
                                     }else{
                                         now_const_object=Variable::var(std::string(1,now_object->StringValue[(size_t)visit_temp.IntValue]));
@@ -542,7 +541,7 @@ namespace L{
                                     fin=is_const_value;
                                     break;
                                 }
-                                case Variable::var_tp::Object:{
+                                case Variable::Object:{
                                     if(now_object->ObjectValue.find(find_str)==now_object->ObjectValue.end()){
                                         if(!nonewobject)now_object->ObjectValue[find_str]=Variable::var(nullptr,false);
                                         else throw member_not_exist;
@@ -550,9 +549,9 @@ namespace L{
                                     now_object=&now_object->ObjectValue[find_str];
                                     break;
                                 }
-                                case Variable::var_tp::Array:{
+                                case Variable::Array:{
                                     try{
-                                        visit_temp=visit_temp.convert(Variable::var_tp::Int);
+                                        visit_temp=visit_temp.convert(Variable::Int);
                                         if((size_t)visit_temp.IntValue>=now_object->ArrayValue.size()){
                                             if(!nonewobject){
                                                 now_object->ArrayValue.resize((size_t)visit_temp.IntValue+1);
@@ -572,9 +571,9 @@ namespace L{
                         }
                         case is_const_value:{
                             switch(now_const_object.tp){
-                                case Variable::var_tp::String:{
+                                case Variable::String:{
                                     try{
-                                        visit_temp=visit_temp.convert(Variable::var_tp::Int);
+                                        visit_temp=visit_temp.convert(Variable::Int);
                                         if(now_const_object.StringValue.size()>=(size_t)visit_temp.IntValue)throw 0;
                                         now_const_object=Variable::var(std::string(1,now_const_object.StringValue[(size_t)visit_temp.IntValue]));
                                     }catch(...){
@@ -582,14 +581,14 @@ namespace L{
                                     }
                                     break;
                                 }
-                                case Variable::var_tp::Object:{
+                                case Variable::Object:{
                                     if(now_const_object.ObjectValue.find(find_str)==now_const_object.ObjectValue.end())throw member_not_exist;
                                     now_const_object=now_const_object.ObjectValue[find_str];
                                     break;
                                 }
-                                case Variable::var_tp::Array:{
+                                case Variable::Array:{
                                     try{
-                                        visit_temp=visit_temp.convert(Variable::var_tp::Int);
+                                        visit_temp=visit_temp.convert(Variable::Int);
                                         if((size_t)visit_temp.IntValue>=now_const_object.ArrayValue.size())throw 0;
                                         now_const_object=now_const_object.ArrayValue[(size_t)visit_temp.IntValue];
                                     }catch(...){
@@ -633,7 +632,7 @@ namespace L{
                     return Return_Object(&all_scope.ObjectValue[n],&this_scope,&this_scope);
                 }else{
                     try{
-                        if(Variable::parse(n).tp==Variable::var_tp::Expression)throw 0;
+                        if(Variable::parse(n).tp==Variable::Expression)throw 0;
                         return Return_Object(exp_calc(Variable::parse(n),scope,all_scope,this_scope),&scope,&scope);
                     }catch(...){
                         throw member_not_exist;
@@ -656,11 +655,11 @@ namespace L{
             std::vector<Variable::var> st;
             std::string op;
             Variable::var res;
-            if(exp.tp!=Variable::var_tp::Expression){
-                if(exp.tp==Variable::var_tp::Object||exp.tp==Variable::var_tp::Array){
+            if(exp.tp!=Variable::Expression){
+                if(exp.tp==Variable::Object||exp.tp==Variable::Array){
                         bool ret_const=exp.isConst;
                         switch((size_t)exp.tp){
-                            case Variable::var_tp::Object:{
+                            case Variable::Object:{
                                 std::map<std::string,Variable::var> x;
                                 bool flag=false;
                                 for(std::map<std::string,Variable::var>::const_iterator i=exp.ObjectValue.cbegin();i!=exp.ObjectValue.cend();i++){
@@ -670,7 +669,7 @@ namespace L{
                                 }
                                 return Variable::var(x,ret_const);
                             }
-                            case Variable::var_tp::Array:{
+                            case Variable::Array:{
                                 std::vector<Variable::var> x(exp.ArrayValue.size());
                                 for(size_t i=0;i<exp.ArrayValue.size();i++){
                                     x[i]=exp_calc(exp.ArrayValue[i],scope,all_scope,this_scope);//calc members of the array
@@ -760,7 +759,7 @@ namespace L{
                 if(args.size()<1||args.size()>2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                 if(isKeyword(args[0])||!isIdentifier(args[0]))return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                 try{
-                    if(Variable::parse(args[0]).tp!=Variable::var_tp::Expression)throw 0;
+                    if(Variable::parse(args[0]).tp!=Variable::Expression)throw 0;
                 }catch(...){
                     return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                 }
@@ -820,7 +819,7 @@ namespace L{
                 if(Variable::var(true)==exp){
                     try{
                         fn=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                        if(fn.tp!=Variable::var_tp::Function)throw 0;
+                        if(fn.tp!=Variable::Function)throw 0;
                     }catch(...){
                         return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                     }
@@ -835,7 +834,7 @@ namespace L{
                 }else if(args.size()==3){
                     try{
                         fn=exp_calc(Variable::parse(args[2]),scope,all_scope,this_scope);
-                        if(fn.tp!=Variable::var_tp::Function)throw 0;
+                        if(fn.tp!=Variable::Function)throw 0;
                     }catch(...){
                         return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                     }
@@ -859,10 +858,10 @@ namespace L{
                     if(i+1!=args.size()){
                         try{
                             x=exp_calc(Variable::parse(args[i]),scope,all_scope,this_scope);
-                            if(x.tp!=Variable::var_tp::Array||x.ArrayValue.size()!=2)throw 0;
+                            if(x.tp!=Variable::Array||x.ArrayValue.size()!=2)throw 0;
                             exp=exp_calc(x.ArrayValue[0],scope,all_scope,this_scope);
                             func=exp_calc(x.ArrayValue[1],scope,all_scope,this_scope);
-                            if(func.tp!=Variable::var_tp::Function)throw 0;
+                            if(func.tp!=Variable::Function)throw 0;
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                         }
@@ -884,7 +883,7 @@ namespace L{
                     }else{
                         try{
                             func=exp_calc(Variable::parse(args[i]),scope,all_scope,this_scope);
-                            if(func.tp!=Variable::var_tp::Function)throw 0;
+                            if(func.tp!=Variable::Function)throw 0;
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                         }
@@ -913,7 +912,7 @@ namespace L{
                 try{
                     exp=Variable::parse(args[0]);
                     func=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                    if(func.tp!=Variable::var_tp::Function)throw 0;
+                    if(func.tp!=Variable::Function)throw 0;
                 }catch(...){
                     return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                 }
@@ -960,11 +959,11 @@ namespace L{
                 try{
                     Variable::var x=Variable::parse(args[0]);
                     func=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                    if(x.tp!=Variable::var_tp::Array||x.ArrayValue.size()!=3||func.tp!=Variable::var_tp::Function)throw 0;
+                    if(x.tp!=Variable::Array||x.ArrayValue.size()!=3||func.tp!=Variable::Function)throw 0;
                     start=x.ArrayValue[0];
                     exp=x.ArrayValue[1];
                     routine=x.ArrayValue[2];
-                    if(start.tp!=Variable::var_tp::Function||exp.tp!=Variable::var_tp::Expression||routine.tp!=Variable::var_tp::Function)throw 0;
+                    if(start.tp!=Variable::Function||exp.tp!=Variable::Expression||routine.tp!=Variable::Function)throw 0;
                 }catch(...){
                     return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                 }
@@ -1020,10 +1019,10 @@ namespace L{
                 bool is_native=false;
                 try{
                     func=exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope);
-                    if(func.tp!=Variable::var_tp::Function)throw 0;
+                    if(func.tp!=Variable::Function)throw 0;
                     try{
                         parent=&get_object(args[0],scope,all_scope,this_scope,0,true).getThis();
-                        if(parent->tp!=Variable::var_tp::Object)parent=&scope;
+                        if(parent->tp!=Variable::Object)parent=&scope;
                     }catch(...){
                         parent=&scope;
                     }
@@ -1058,11 +1057,11 @@ namespace L{
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
                             Variable::var op=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                            if(op.tp!=Variable::var_tp::Array||op.ArrayValue.size()<1||op.ArrayValue.size()>2||op.ArrayValue[0].tp!=Variable::var_tp::Int)throw 0;
+                            if(op.tp!=Variable::Array||op.ArrayValue.size()<1||op.ArrayValue.size()>2||op.ArrayValue[0].tp!=Variable::Int)throw 0;
                             if(op.ArrayValue[0].IntValue<0)ret="";
                             else if(op.ArrayValue.size()==1)ret=fn_native.getConstParent().StringValue.substr((size_t)op.ArrayValue[0].IntValue);
                             else if(op.ArrayValue.size()==2){
-                                if(op.ArrayValue[1].tp!=Variable::var_tp::Int)throw 0;
+                                if(op.ArrayValue[1].tp!=Variable::Int)throw 0;
                                 else if(op.ArrayValue[1].IntValue<0)ret="";
                                 else ret=fn_native.getConstParent().StringValue.substr((size_t)op.ArrayValue[0].IntValue,(size_t)op.ArrayValue[1].IntValue);
                             }
@@ -1073,9 +1072,9 @@ namespace L{
                         try{
                             if(args.size()<2)throw 0;
                             Variable::var sp;
-                            ret.tp=Variable::var_tp::String;
+                            ret.tp=Variable::String;
                             sp=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                            if(sp.tp!=Variable::var_tp::String)throw 0;
+                            if(sp.tp!=Variable::String)throw 0;
                             for(size_t i=0;i<fn_native.getConstParent().ArrayValue.size();i++){
                                 if(i+1!=fn_native.getConstParent().ArrayValue.size()){
                                     ret.StringValue+=fn_native.getConstParent().ArrayValue[i].toString_nonconst()+sp.StringValue;
@@ -1104,7 +1103,7 @@ namespace L{
                     }else if(member=="convert"){
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
-                            if(exp_calc(Variable::var(args[0]),scope,all_scope,this_scope).tp!=Variable::var_tp::String)throw 0;
+                            if(exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope).tp!=Variable::String)throw 0;
                             ret=exp_calc(Variable::parse(fn_native.getConstParent().StringValue),scope,all_scope,this_scope).convert(Variable::getStrType(exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope).StringValue));;
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
@@ -1115,7 +1114,7 @@ namespace L{
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
                             Variable::var op=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                            if(op.tp!=Variable::var_tp::Array||op.ArrayValue.size()!=2||op.ArrayValue[0].tp!=Variable::var_tp::Int)throw 0;
+                            if(op.tp!=Variable::Array||op.ArrayValue.size()!=2||op.ArrayValue[0].tp!=Variable::Int)throw 0;
                             if(fn_native.getParent().ArrayValue.size()<=(size_t)op.ArrayValue[0].IntValue)fn_native.getParent().ArrayValue.resize((size_t)op.ArrayValue[0].IntValue+1);
                             op.ArrayValue[1].isConst=false;
                             fn_native.getParent().ArrayValue.insert(fn_native.getParent().ArrayValue.begin()+((size_t)op.ArrayValue[0].IntValue),op.ArrayValue[1]);
@@ -1126,9 +1125,9 @@ namespace L{
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
                             Variable::var op=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                            if(op.tp!=Variable::var_tp::Int)throw 0;
+                            if(op.tp!=Variable::Int)throw 0;
                             fn_native.getParent().ArrayValue.resize((size_t)op.IntValue);
-                            for(size_t i=0;i<fn_native.getParent().ArrayValue.size();i++)if(fn_native.getParent().ArrayValue[i].tp==Variable::var_tp::Null&&fn_native.getParent().ArrayValue[i].isConst)fn_native.getParent().ArrayValue[i].isConst=false;
+                            for(size_t i=0;i<fn_native.getParent().ArrayValue.size();i++)if(fn_native.getParent().ArrayValue[i].tp==Variable::Null&&fn_native.getParent().ArrayValue[i].isConst)fn_native.getParent().ArrayValue[i].isConst=false;
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                         }
@@ -1148,7 +1147,7 @@ namespace L{
                 }else{
                     Variable::var temp_scope;
                     temp_scope.isConst=false;
-                    temp_scope.tp=Variable::var_tp::Object;
+                    temp_scope.tp=Variable::Object;
                     if(args.size()>=2){
                         try{
                             temp_scope.ObjectValue["arguments"]=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
@@ -1200,7 +1199,7 @@ namespace L{
                 try{
                     hook=exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope);
                     fn=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                    if(hook.tp!=Variable::var_tp::Function||fn.tp!=Variable::var_tp::Function)throw 0;
+                    if(hook.tp!=Variable::Function||fn.tp!=Variable::Function)throw 0;
                 }catch(...){
                     return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                 }
