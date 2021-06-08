@@ -409,15 +409,10 @@ namespace Variable{
                                 tmp+="\\n";
                                 break;
                             }
-                            case '\\':{
-                                tmp+="\\\\";
-                                break;
-                            }
-                            case '\'':{
-                                tmp+="\\\'";
-                            }
+                            case '\\':
+                            case '\'':
                             case '"':{
-                                tmp+="\\\"";
+                                tmp+=std::string("\\")+StringValue[i];
                                 break;
                             }
                             default:{
