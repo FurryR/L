@@ -1028,7 +1028,7 @@ namespace L{
                         }else ret=res.value;
                     }else if(member=="parse"){
                         try{
-                            ret=exp_calc(fn_native.getConstParent().StringValue,scope,all_scope,this_scope);
+                            ret=exp_calc(Variable::parse(fn_native.getConstParent().StringValue),scope,all_scope,this_scope);
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
                         }
