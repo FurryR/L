@@ -15,4 +15,3 @@ jobs:
     - name: Make release
       run: 
         ls
-        make
