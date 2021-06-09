@@ -13,4 +13,6 @@ jobs:
 
     steps:
     - name: Make release
-      run: make make
+      run: 
+        ls
+        make
