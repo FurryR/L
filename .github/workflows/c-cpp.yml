@@ -13,5 +13,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Linux Releases
-      run: make
+    - uses:
+    - name: make Releases
+      run: apt install -y mingw-w64
+      run: make github
+    - name: Create GitHub release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: ${{ env.ReleaseVersion }}
+        title: L programming language ${{ env.ReleaseVersion }}
+        prerelease: false
+        files: |
+          artifacts/packages/*
