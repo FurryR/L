@@ -19,6 +19,11 @@ namespace L{
                 if(p[i]==','&&j==0&&a==0)ret.push_back(temp),temp="";else temp+=p[i];
             }
             if(temp!="")ret.push_back(temp);
+            for(size_t i=0,a=0;i<ret.size();i++){
+                a=0;
+                while(a<ret[i].length()&&ret[i][a]==' ')a++;
+                ret[i]=ret[i].substr(a);
+            }
             return ret;
         }
         std::string arg2str(const std::vector<std::string>& arg) const{
@@ -35,26 +40,20 @@ namespace L{
         }
         L_base(){}
         L_base(const std::string& x){
-            std::string p;
             if(x==""||x[0]=='#')return;
-            for(size_t i=0,a=0;i<x.length();i++){
+            size_t i=0;
+            for(size_t a=0,j=0;i<x.length();i++){
                 if(i==0)while(x[i]==' ')i++;
                 if(x[i]=='"'&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
                 if(x[i]=='\''&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
                 if(x[i]=='#'&&a==0){
-                    while(x[i]!='\n')i++;
-                }else if(x[i]!='\n'&&x[i]!='\t')p+=x[i];
+                    while(i<x.length()&&x[i]!='\n')i++;
+                }else if(x[i]=='\n'||x[i]=='\t')continue;//p+=x[i];
+                else if((x[i]=='('||x[i]=='{'||x[i]=='[')&&a==0)j++;else if((x[i]==')'||x[i]=='}'||x[i]==']')&&a==0)j--;
+                else if(x[i]==' '&&j==0&&a==0)break;else name+=x[i];
             }
-            if(p==""||p[0]=='#')return;
-            size_t i=0;
-            for(size_t j=0,a=0;i<p.length();i++){
-                if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
-                if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-                if(p[i]==' '&&j==0&&a==0)break;else name+=p[i];
-            }
-            if(i==p.length())return;
-            args=split_arg(p.substr(i+1));
+            if(i==x.length())return;
+            args=split_arg(x.substr(i+1));
         }
         bool operator==(const L_base& x) const{
             if(x.name==name&&x.args==args)return true;
@@ -85,28 +84,8 @@ namespace L{
             scope.tp=Variable::Object;
             return eval(scope,scope,scope);
         }
-        L(){}
-        L(const std::string& x){
-            std::string p;
-            for(size_t i=0,a=0;i<x.length();i++){
-                if(i==0)while(x[i]==' ')i++;
-                if(x[i]=='"'&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(x[i]=='\''&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
-                if(x[i]=='#'&&a==0){
-                    while(x[i]!='\n')i++;
-                }else if(x[i]!='\n'&&x[i]!='\t')p+=x[i];
-            }
-            if(p==""||p[0]=='#')return;
-            size_t i=0;
-            for(size_t j=0,a=0;i<p.length();i++){
-                if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
-                if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-                if(p[i]==' '&&j==0&&a==0)break;else name+=p[i];
-            }
-            if(i==p.length())return;
-            args=split_arg(p.substr(i+1));
-        }
+        L():L_base(){}
+        L(const std::string& x):L_base(x){}//= L_base(const std::string&);
         private:
         typedef enum Object_Type{
             is_pointer=0,
