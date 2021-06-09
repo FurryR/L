@@ -460,9 +460,8 @@ namespace Variable{
             switch(tp){
                 case Int:{
                     switch(type){
-                        case Boolean:{
-                            return var((bool)IntValue);
-                        }
+                        case Boolean:return var((bool)IntValue);
+                        case String:return var(toString_nonconst());
                         default:throw "failed";
                     }
                     break;
@@ -470,6 +469,7 @@ namespace Variable{
                 case Boolean:{
                     switch(type){
                         case Int:return var((int)BooleanValue);
+                        case String:return var(toString_nonconst());
                         default:throw "failed";
                     }
                 }
@@ -495,6 +495,7 @@ namespace Variable{
                             }
                             return var(ret);
                         }
+                        case String:return var(toString_nonconst());
                         default:throw "failed";
                     }
                     break;
@@ -502,7 +503,10 @@ namespace Variable{
                 case Null:
                 case Function:
                 case Object:{
-                    throw "failed";
+                    switch(type){
+                        case String:return var(toString_nonconst());
+                        default:throw "failed";
+                    }
                 }
                 default:throw "failed";
             }
