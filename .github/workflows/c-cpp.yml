@@ -12,5 +12,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: make
-      run: make
+    - name: Make release
+      run: make make
