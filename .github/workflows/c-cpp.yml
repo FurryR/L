@@ -19,8 +19,8 @@ jobs:
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: ${{ env.ReleaseVersion }}
-        title: L programming language ${{ env.ReleaseVersion }}
+        automatic_release_tag: release
+        title: L programming language latest stable update
         prerelease: false
         files: |
           artifacts/packages/*
