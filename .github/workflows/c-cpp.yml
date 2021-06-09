@@ -23,4 +23,7 @@ jobs:
         title: L programming language latest stable update
         prerelease: false
         files: |
-          artifacts/packages/*
+          lpp_linux32
+          lpp_linux64
+          lpp_win32.exe
+          lpp_win64.exe
