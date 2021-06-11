@@ -140,9 +140,10 @@ int main(int argc,char** argv){
             cm=m;
             while(!s.eof()){
                 size_t a=0,j=0;
-                for(size_t i=0;i<cm.length();i++){
-                    if(cm[i]=='"'&&(cm[i-1]!='\\'||cm[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                    if(cm[i]=='\''&&(cm[i-1]!='\\'||cm[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+                for(size_t i=0,z=0;i<cm.length();i++){
+                    if(cm[i]=='\\')z=!z;
+                    if(cm[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}else if(cm[i]=='\"')z=0;
+                    if(cm[i]=='\''&&!z){if(a==2)a=1;else if(a==2)a=0;}else if(cm[i]=='\'')z=0;
                     if(cm[i]=='#'&&a==0){
                         while(i<cm.length()&&cm[i]!='\n')i++;
                         i++;
@@ -151,7 +152,7 @@ int main(int argc,char** argv){
                     if((cm[i]=='['||cm[i]=='{'||cm[i]=='(')&&a==0)j++;
                     if((cm[i]==']'||cm[i]=='}'||cm[i]==')')&&a==0)j--;
                 }
-                if(a!=0||j!=0){
+                if(a!=0||j!=0||cm[cm.length()-1]==','){
                     std::string temp;
                     std::getline(s,temp);
                     cm+=temp;
@@ -203,9 +204,10 @@ int main(int argc,char** argv){
                 while(!std::cin.eof()){
                     size_t a=0,j=0;
                     std::cin.clear();
-                    for(size_t i=0;i<cm.length();i++){
-                        if(cm[i]=='"'&&(cm[i-1]!='\\'||cm[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                        if(cm[i]=='\''&&(cm[i-1]!='\\'||cm[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+                    for(size_t i=0,z=0;i<cm.length();i++){
+                        if(cm[i]=='\\')z=!z;
+                        if(cm[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}else if(cm[i]=='\"')z=0;
+                        if(cm[i]=='\''&&!z){if(a==2)a=1;else if(a==2)a=0;}else if(cm[i]=='\'')z=0;
                         if(cm[i]=='#'&&a==0){
                             while(i<cm.length()&&cm[i]!='\n')i++;
                             i++;
@@ -214,7 +216,7 @@ int main(int argc,char** argv){
                         if((cm[i]=='['||cm[i]=='{'||cm[i]=='(')&&a==0)j++;
                         if((cm[i]==']'||cm[i]=='}'||cm[i]==')')&&a==0)j--;
                     }
-                    if(a!=0||j!=0){
+                    if(a!=0||j!=0||cm[cm.length()-1]==','){
                         std::string temp;
                         std::cout<<"... "<<std::flush;
                         std::getline(std::cin,temp);

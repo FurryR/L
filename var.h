@@ -16,11 +16,11 @@ FORCE_UTF8 : converts Unicode to UTF-8 by force.
 #include<codecvt>
 #endif
 namespace Variable{
-    size_t colon_judge(char now,char s1,char s2,size_t nowa){
-        if(now=='"'&&(s1!='\\'||s2=='\\')){
+    size_t colon_judge(char now,size_t nowa,bool z){
+        if(now=='\"'&&!z){
             if(nowa==0)return 1;else if(nowa==1)return 0;else return nowa;
         }
-        else if(now=='\''&&(s1!='\\'||s2=='\\')){
+        else if(now=='\''&&!z){
             if(nowa==0)return 2;else if(nowa==2)return 0;else return nowa;
         }
         return nowa;
@@ -119,16 +119,22 @@ namespace Variable{
         return fin;
     }
     std::vector<std::string> splitExpression(const std::string& p){
-        short a=0;
+        size_t a=0;
         int f=0;
         bool x=false;
+        bool z=true;
         std::vector<std::string> ret;
         std::string temp;
         for(size_t i=0;i<p.length();i++){
             switch(p[i]){
+                case '\\':{
+                    z=!z;
+                    break;
+                }
                 case '\'':
                 case '\"':{
-                    a=colon_judge(p[i],i>0?p[i-1]:' ',i>1?p[i-2]:' ',a);
+                    a=colon_judge(p[i],a,z);
+                    z=false;
                     temp+=p[i];
                     break;
                 }
@@ -234,8 +240,10 @@ namespace Variable{
     }
     bool isExpression(const std::string& p){
         bool flag=false;
-        for(size_t i=0,j=0,a=0;i<p.length();i++){
-            a=colon_judge(p[i],i>0?p[i-1]:' ',i>1?p[i-2]:' ',a);
+        for(size_t i=0,j=0,a=0,z=0;i<p.length();i++){
+            if(p[i]=='\\')z=!z;
+            a=colon_judge(p[i],a,z);
+            if(p[i]=='\"'||p[i]=='\'')z=0;
             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
             else if(get_op_priority(std::string(1,p[i]))!=-1&&(i>0&&p[i-1]!='e')&&a==0&&j==0)flag=true;
         }
@@ -268,8 +276,10 @@ namespace Variable{
     }
     std::string clearnull(const std::string& x){
         std::string tmp;
-        for(size_t i=0,a=0;i<x.length();i++){
-            a=colon_judge(x[i],i>0?x[i-1]:' ',i>1?x[i-2]:' ',a);
+        for(size_t i=0,a=0,z=0;i<x.length();i++){
+            if(x[i]=='\\')z=!z;
+            a=colon_judge(x[i],a,z);
+            if(x[i]=='\"'||x[i]=='\'')z=0;
             if((x[i]=='\r'||x[i]=='\n'||x[i]=='\t')&&a==0)continue;
             else if(x[i]==' '&&a==0&&(i<=0||(tmp[i-1]=='('||tmp[i-1]=='['||tmp[i-1]=='{'||tmp[i-1]==' '))&&(i<=0||!((tmp[i-1]>='a'&&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||(tmp[i-1]>='0'&&tmp[i-1]<='9')))){
                 //if(i<=0)continue;
@@ -281,15 +291,19 @@ namespace Variable{
     }
     std::vector<std::string> code_split(const std::string& x){
         std::string p;
-        for(size_t i=0,a=0;i<x.length();i++){
-            a=colon_judge(x[i],i>0?x[i-1]:' ',i>1?x[i-2]:' ',a);
+        for(size_t i=0,a=0,z=0;i<x.length();i++){
+            if(x[i]=='\\')z=!z;
+            a=colon_judge(x[i],a,z);
+            if(x[i]=='\"'||x[i]=='\'')z=0;
             if(x[i]=='\n'&&a==0&&i>=1&&x[i-1]!='['&&x[i-1]!='('&&x[i-1]!='{')p+=';';//p[i]=';';else p[i]=' ';
             if(x[i]!='\n')p+=x[i];
         }
         std::vector<std::string> ret;
         std::string temp;
-        for(size_t i=0,j=0,a=0;i<p.length();i++){
-            a=colon_judge(x[i],i>0?x[i-1]:' ',i>1?x[i-2]:' ',a);
+        for(size_t i=0,j=0,a=0,z=0;i<p.length();i++){
+            if(p[i]=='\\')z=!z;
+            a=colon_judge(p[i],a,z);
+            if(p[i]=='\"'||p[i]=='\'')z=0;
             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
             if(p[i]==';'&&a==0&&j==0)ret.push_back(temp),temp="";else temp+=p[i];
         }
@@ -412,7 +426,7 @@ namespace Variable{
                             }
                             case '\\':
                             case '\'':
-                            case '"':{
+                            case '\"':{
                                 tmp+=std::string("\\")+StringValue[i];
                                 break;
                             }
@@ -793,8 +807,10 @@ namespace Variable{
             if(isExpression(p)==false)throw 0;
         }catch(...){
             try{
-                for(size_t i=0,a=0,j=0;i<p.length();i++){
-                    a=colon_judge(p[i],i>0?p[i-1]:' ',i>1?p[i-2]:' ',a);
+                for(size_t i=0,a=0,j=0,z=0;i<p.length();i++){
+                    if(p[i]=='\\')z=!z;
+                    a=colon_judge(p[i],a,z);
+                    if(p[i]=='\"'||p[i]=='\'')z=0;
                     if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
                     if(p[i]=='.'&&a==0&&j==0){
                         if(p[i+1]>='0'&&p[i+1]<='9')continue;
@@ -812,7 +828,7 @@ namespace Variable{
                         if(tmp[i]=='\\'){
                             i++;
                             switch(tmp[i]){
-                                case '"':
+                                case '\"':
                                 case '\\':
                                 case '\'':{
                                     ret+=tmp[i];
@@ -859,9 +875,11 @@ namespace Variable{
                     bool isobject=(p[0]=='{');
                     for(size_t i=1,a=0;i<p.length()-1;i++){
                         if(isobject){
-                            for(;i<p.length()-1;i++){
-                                a=colon_judge(p[i],i>0?p[i-1]:' ',i>1?p[i-2]:' ',a);
-                                if((p[i]=='"'||p[i]=='\'')&&(p[i-1]!='{'||p[i-1]!=',')&&a==0){
+                            for(bool z=false;i<p.length()-1;i++){
+                                if(p[i]=='\\')z=!z;
+                                a=colon_judge(p[i],a,z);
+                                if(p[i]=='\"'||p[i]=='\'')z=0;
+                                if((p[i]=='\"'||p[i]=='\'')&&(p[i-1]!='{'||p[i-1]!=',')&&a==0){
                                     key+=p[i++];
                                     break;
                                 }
@@ -869,8 +887,10 @@ namespace Variable{
                             }
                             i++;//: token
                         }
-                        for(size_t j=0;i<p.length()-1;i++){
-                            a=colon_judge(p[i],i>0?p[i-1]:' ',i>1?p[i-2]:' ',a);
+                        for(size_t j=0,z=0;i<p.length()-1;i++){
+                            if(p[i]=='\\')z=!z;
+                            a=colon_judge(p[i],a,z);
+                            if(p[i]=='\"'||p[i]=='\'')z=0;
                             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
                             if(p[i]==','&&j==0&&a==0)break;else value+=p[i];
                         }

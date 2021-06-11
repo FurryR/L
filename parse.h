@@ -12,9 +12,10 @@ namespace L{
         std::vector<std::string> split_arg(const std::string& p) const{
             std::vector<std::string> ret(0);
             std::string temp="";
-            for(size_t i=0,j=0,a=0;i<p.length();i++){
-                if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+            for(size_t i=0,j=0,a=0,z=0;i<p.length();i++){
+                if(p[i]=='\\')z=!z;
+                if(p[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}else if(p[i]=='\"')z=0;
+                if(p[i]=='\''&&!z){if(a==0)a=2;else if(a==2)a=0;}else if(p[i]=='\'')z=0;
                 if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
                 if(p[i]==','&&j==0&&a==0)ret.push_back(temp),temp="";else temp+=p[i];
             }
@@ -42,10 +43,11 @@ namespace L{
         L_base(const std::string& x){
             if(x==""||x[0]=='#')return;
             size_t i=0;
-            for(size_t a=0,j=0;i<x.length();i++){
+            for(size_t a=0,j=0,z=0;i<x.length();i++){
                 if(i==0)while(x[i]==' ')i++;
-                if(x[i]=='"'&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(x[i]=='\''&&(x[i-1]!='\\'||x[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+                if(x[i]=='\\')z=!z;
+                if(x[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}else if(x[i]=='\"')z=0;
+                if(x[i]=='\''&&!z){if(a==0)a=2;else if(a==2)a=0;}else if(x[i]=='\'')z=0;
                 if(x[i]=='#'&&a==0){
                     while(i<x.length()&&x[i]!='\n')i++;
                 }else if(x[i]=='\n'||x[i]=='\t')continue;//p+=x[i];
@@ -161,9 +163,10 @@ namespace L{
         std::vector<std::string> get_name_split(const std::string& p) const{
             std::vector<std::string> visit;
             std::string temp;
-            for(size_t i=0,a=0,j=0;i<p.length();i++){
-                if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+            for(size_t i=0,a=0,j=0,z=0;i<p.length();i++){
+                if(p[i]=='\\')z=!z;
+                if(p[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}else if(p[i]=='\"')z=0;
+                if(p[i]=='\''&&!z){if(a==0)a=2;else if(a==2)a=0;}else if(p[i]=='\'')z=0;
                 if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
                 if(p[i]=='['&&a==0&&j==1){
                     if(temp!="")visit.push_back(temp),temp="";
@@ -198,9 +201,10 @@ namespace L{
         }
         std::string get_first_name(const std::string& p) const{
             std::string temp;
-            for(size_t i=0,a=0,j=0;i<p.length();i++){
-                if(p[i]=='"'&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=1;else if(a==1)a=0;}
-                if(p[i]=='\''&&(p[i-1]!='\\'||p[i-2]=='\\')){if(a==0)a=2;else if(a==2)a=0;}
+            for(size_t i=0,a=0,j=0,z=0;i<p.length();i++){
+                if(p[i]=='\\')z=!z;
+                if(p[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}else if(p[i]=='\"')z=0;
+                if(p[i]=='\''&&!z){if(a==0)a=2;else if(a==2)a=0;}else if(p[i]=='\'')z=0;
                 if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
                 if(p[i]=='.'&&a==0&&j==0)break;
                 if(p[i]=='['&&a==0&&j==1){
