@@ -1082,8 +1082,8 @@ namespace L{
                     }else if(member=="convert"){
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{
-                            if(exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope).tp!=Variable::String)throw 0;
-                            ret=exp_calc(Variable::parse(fn_native.getConstParent().StringValue),scope,all_scope,this_scope).convert(Variable::getStrType(exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope).StringValue));;
+                            if(exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope).tp!=Variable::String)throw 0;
+                            ret=fn_native.getConstParent().convert(Variable::getStrType(exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope).StringValue));
                         }catch(...){
                             return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
                         }

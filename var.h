@@ -237,7 +237,7 @@ namespace Variable{
         for(size_t i=0,j=0,a=0;i<p.length();i++){
             a=colon_judge(p[i],i>0?p[i-1]:' ',i>1?p[i-2]:' ',a);
             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-            else if(get_op_priority(std::string(1,p[i]))!=-1&&a==0&&j==0)flag=true;
+            else if(get_op_priority(std::string(1,p[i]))!=-1&&(i>0&&p[i-1]!='e')&&a==0&&j==0)flag=true;
         }
         return flag;
     }
@@ -462,7 +462,7 @@ namespace Variable{
                     switch(type){
                         case Boolean:return var((bool)IntValue);
                         case String:return var(toString_nonconst());
-                        default:throw "failed";
+                        default:throw 0;
                     }
                     break;
                 }
@@ -470,7 +470,7 @@ namespace Variable{
                     switch(type){
                         case Int:return var((int)BooleanValue);
                         case String:return var(toString_nonconst());
-                        default:throw "failed";
+                        default:throw 0;
                     }
                 }
                 case String:{
@@ -482,7 +482,7 @@ namespace Variable{
                             }
                             return var(ret);
                         }
-                        default:throw "failed";
+                        default:throw 0;
                     }
                     break;
                 }
@@ -496,7 +496,7 @@ namespace Variable{
                             return var(ret);
                         }
                         case String:return var(toString_nonconst());
-                        default:throw "failed";
+                        default:throw 0;
                     }
                     break;
                 }
@@ -505,14 +505,14 @@ namespace Variable{
                 case Object:{
                     switch(type){
                         case String:return var(toString_nonconst());
-                        default:throw "failed";
+                        default:throw 0;
                     }
                 }
-                default:throw "failed";
+                default:throw 0;
             }
             return var();
         }
-        var operator+(const var& opx){
+        var operator+(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -531,11 +531,11 @@ namespace Variable{
                     return ret;
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator-(const var& opx){
+        var operator-(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -543,11 +543,11 @@ namespace Variable{
                     return var(IntValue-op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator*(const var& opx){
+        var operator*(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -555,11 +555,11 @@ namespace Variable{
                     return var(IntValue*op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator/(const var& opx){
+        var operator/(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -567,11 +567,11 @@ namespace Variable{
                     return var(IntValue/op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator%(const var& opx){
+        var operator%(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -579,11 +579,11 @@ namespace Variable{
                     return var((int)IntValue%(int)op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator&(const var& opx){
+        var operator&(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -591,11 +591,11 @@ namespace Variable{
                     return var((int)IntValue&(int)op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator|(const var& opx){
+        var operator|(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -603,11 +603,11 @@ namespace Variable{
                     return var((int)IntValue|(int)op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator^(const var& opx){
+        var operator^(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -615,21 +615,21 @@ namespace Variable{
                     return var((int)IntValue^(int)op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var operator~(){
+        var operator~() const{
             switch(tp){
                 case Int:{
                     return var(~(int)IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var leftmove(const var& opx){
+        var leftmove(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -637,11 +637,11 @@ namespace Variable{
                     if(op.IntValue>=32)return var((int)IntValue);else return var((int)IntValue<<(int)op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var rightmove_signed(const var& opx){
+        var rightmove_signed(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -649,11 +649,11 @@ namespace Variable{
                     if(op.IntValue>=32)return var((int)IntValue);else return var((int)IntValue>>(int)op.IntValue);
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
-        var rightmove_unsigned(const var& opx){
+        var rightmove_unsigned(const var& opx) const{
             var ret;
             const var op=opx.convert(tp);
             switch(tp){
@@ -661,7 +661,7 @@ namespace Variable{
                     return var(double((unsigned int)IntValue>>(unsigned int)op.IntValue));
                 }
                 default:{
-                    throw "failed";
+                    throw 0;
                 }
             }
         }
@@ -712,10 +712,10 @@ namespace Variable{
             }
             return false;
         }
-        bool operator!=(const var& op){
+        bool operator!=(const var& op) const{
             return !operator==(op);
         }
-        bool operator>(const var& opx){
+        bool operator>(const var& opx) const{
             try{
                 opx.convert(tp);
             }catch(...){
@@ -735,13 +735,13 @@ namespace Variable{
             }
             return false;
         }
-        bool operator<(const var& op){
+        bool operator<(const var& op) const{
             return (!operator>(op))&&(!operator==(op));
         }
-        bool operator>=(const var& op){
+        bool operator>=(const var& op) const{
             return operator>(op)||operator==(op);
         }
-        bool operator<=(const var& op){
+        bool operator<=(const var& op) const{
             return operator<(op)||operator==(op);
         }
         bool operator&&(const var& op) const{
@@ -750,7 +750,7 @@ namespace Variable{
         bool operator||(const var& op) const{
             return (operator==(var(1)))||(op==var(1));
         }
-        bool operator!(){
+        bool operator!() const{
             if(tp==Boolean||tp==Int){
                 if(tp==Boolean)return !BooleanValue;
                 else return !(bool)IntValue;
@@ -801,7 +801,7 @@ namespace Variable{
                         else throw 0;
                     }
                 }
-                if(p.find_first_of('.')!=std::string::npos)std::stod(p);
+                if(p.find_first_of('.')!=std::string::npos||p.find_first_of('e')!=std::string::npos)std::stod(p);
                 else std::stoi(p,0,0);
             }catch(...){
                 if(p=="null")return var(nullptr,isc);
@@ -883,7 +883,7 @@ namespace Variable{
                 if(p[0]=='('&&p[p.length()-1]==')')return var(Fn_temp(code_split(p.substr(1,p.length()-2))),isc);
                 return var(genExpression(splitExpression(p)),isc);
             }
-            if(p.find_first_of('.')==std::string::npos)return var(std::stoi(p,0,0),isc);else return var(std::stod(p),isc);
+            if(p.find_first_of('.')==std::string::npos&&p.find_first_of('e')==std::string::npos)return var(std::stoi(p,0,0),isc);else return var(std::stod(p),isc);
         }
         return var(genExpression(splitExpression(p)),isc);
     }
