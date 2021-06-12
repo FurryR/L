@@ -122,7 +122,7 @@ namespace Variable{
         size_t a=0;
         int f=0;
         bool x=false;
-        bool z=true;
+        bool z=false;
         std::vector<std::string> ret;
         std::string temp;
         for(size_t i=0;i<p.length();i++){
@@ -134,7 +134,6 @@ namespace Variable{
                 case '\'':
                 case '\"':{
                     a=colon_judge(p[i],a,z);
-                    z=false;
                     temp+=p[i];
                     break;
                 }
@@ -232,6 +231,7 @@ namespace Variable{
                     break;
                 }
             }
+            if(p[i]!='\\')z=false;
         }
         if(f!=0)throw 0;
         if(a!=0)throw 0;
