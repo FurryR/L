@@ -129,6 +129,7 @@ namespace Variable{
             switch(p[i]){
                 case '\\':{
                     z=!z;
+                    temp+=p[i];
                     break;
                 }
                 case '\'':
