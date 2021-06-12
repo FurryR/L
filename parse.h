@@ -53,8 +53,8 @@ namespace L{
                 if(x[i]=='#'&&a==0){
                     while(i<x.length()&&x[i]!='\n')i++;
                 }else if(x[i]=='\n'||x[i]=='\t')continue;//p+=x[i];
-                else if((x[i]=='('||x[i]=='{'||x[i]=='[')&&a==0)j++;else if((x[i]==')'||x[i]=='}'||x[i]==']')&&a==0)j--;
-                else if(x[i]==' '&&j==0&&a==0)break;else name+=x[i];
+                if((x[i]=='('||x[i]=='{'||x[i]=='[')&&a==0)j++;else if((x[i]==')'||x[i]=='}'||x[i]==']')&&a==0)j--;
+                if(x[i]==' '&&j==0&&a==0)break;else name+=x[i];
             }
             if(i==x.length())return;
             args=split_arg(x.substr(i+1));
