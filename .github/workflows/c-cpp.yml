@@ -20,7 +20,7 @@ jobs:
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: release
-        title: L programming language latest stable update
+        title: L programming language latest update
         prerelease: false
         files: |
           lpp_linux32
