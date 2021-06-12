@@ -1013,7 +1013,7 @@ namespace L{
                     }catch(...){
                         parent=&scope;
                     }
-                    if(func.FunctionValue.value[0].substr(0,8)=="default "){
+                    if(func.FunctionValue.value.size()>0&&func.FunctionValue.value[0].substr(0,8)=="default "){
                         try{
                             fn_native=get_object(args[0],scope,all_scope,this_scope);
                             if(fn_native.tp!=is_native_function)throw 0;
