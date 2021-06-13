@@ -1,10 +1,10 @@
 #en_US.UTF-8
 lpp_title:"L interpreter Version {0} English Edition"
-lpp_usage_information:"using:lpp (langfile=langfile) [--help/help/terminal/file=(filename)] (arguments)..."
-lpp_usage_argument_langfile:"langfile : select language file."
+lpp_usage_information:"using:lpp (lang=langfile) [--help/help/terminal/(filename)] (arguments)..."
+lpp_usage_argument_langfile:"lang : select language file."
 lpp_usage_argument_help:"help/--help : display this help message."
 lpp_usage_argument_terminal:"terminal : start L terminal."
-lpp_usage_argument_file:"file : run script."
+lpp_usage_argument_file:"(filename) : run script."
 lpp_failed_open_file:"failed to open {0} file."
 lpp_loading_terminal:"loading terminal..."
 lpp_terminal_welcome:"welcome!use .debug to show the variables,.exit to exit."

@@ -7,7 +7,7 @@ Copyright(c) 2021 nu11ptr team.
 #include"./parse.h"
 #include<iostream>
 #include<fstream>
-#define VERSION_INFO "1.0.1-r_release"
+#define VERSION_INFO "1.1.0-r_release"
 typedef class str_factory{
     std::string fmt;
     public:
@@ -62,11 +62,11 @@ void lang_init(){
     lang_set(
     "#en_US.C\n"
     "lpp_title:\"L interpreter Version {0} English Edition\"\n"
-    "lpp_usage_information:\"using:lpp (langfile=langfile) [--help/help/terminal/file=(filename)] (arguments)...\"\n"
-    "lpp_usage_argument_langfile:\"langfile : select language file.\"\n"
+    "lpp_usage_information:\"using:lpp (lang=langfile) [--help/help/(filename)] (arguments)...\"\n"
+    "lpp_usage_argument_langfile:\"lang : select language file.\"\n"
     "lpp_usage_argument_help:\"help/--help : display this help message.\"\n"
     "lpp_usage_argument_terminal:\"terminal : start L terminal.\"\n"
-    "lpp_usage_argument_file:\"file : run script.\"\n"
+    "lpp_usage_argument_file:\"(filename) : run script.\"\n"
     "lpp_failed_open_file:\"failed to open {0} file.\"\n"
     "lpp_loading_terminal:\"loading terminal...\"\n"
     "lpp_terminal_welcome:\"welcome!use .debug to show the variables,.exit to exit.\"\n"
@@ -82,10 +82,10 @@ int main(int argc,char** argv){
     std::vector<std::string> program_arg;
     std::string langfile;
     bool uselangfile=false;
-    //if(arg.size()==0)arg.push_back("--terminal");else arg[0]="--terminal";//default arguments for develop
+    //if(arg.size()==0)arg.push_back("terminal");else arg[0]="terminal";//default arguments for develop
     for(size_t i=1;i<(size_t)argc;i++)arg[i-1]=std::string(argv[i]);
-    if(arg.size()>=1&&arg[0].substr(0,9)=="langfile="){
-        langfile=arg[0].substr(9);
+    if(arg.size()>0&&arg[0].substr(0,5)=="lang="){
+        langfile=arg[0].substr(5);
         std::ifstream s(langfile);
         if(!s.is_open()){
             std::cout<<"failed to open language file."<<std::endl;
@@ -108,7 +108,7 @@ int main(int argc,char** argv){
             program_arg=std::vector<std::string>(arg.begin()+1,arg.end());
         }
     }
-    if(arg.size()==0||arg[uselangfile]=="--help"||arg[uselangfile]=="help"){
+    if(arg.size()==0||(uselangfile&&arg.size()==1)||arg[uselangfile]=="--help"||arg[uselangfile]=="help"){
         std::cout<<strmap["lpp_title"].format({VERSION_INFO})<<std::endl;
         std::cout<<strmap["lpp_usage_information"].format()<<std::endl;
         std::cout<<strmap["lpp_usage_argument_langfile"].format()<<std::endl;
@@ -116,10 +116,72 @@ int main(int argc,char** argv){
         std::cout<<strmap["lpp_usage_argument_terminal"].format()<<std::endl;
         std::cout<<strmap["lpp_usage_argument_file"].format()<<std::endl;
         return 0;
-    }
-    if(arg[uselangfile].substr(0,5)=="file="){
-        std::string filename=arg[uselangfile].substr(5);
-        std::ifstream s(filename);
+    }else if(arg[uselangfile]=="terminal"){
+        std::cout<<strmap["lpp_loading_terminal"].format()<<std::endl;
+        std::cout<<strmap["lpp_terminal_welcome"].format()<<std::endl;
+        Variable::var f;
+        f.isConst=false;
+        f.tp=Variable::Object;
+        while(!std::cin.eof()){
+            std::string m,cm;
+            std::cout<<">>> "<<std::flush;
+            std::cin.clear();
+            std::getline(std::cin,m);
+            if(m[0]=='.'){//REPL COMMAND
+                if(m==".exit")return 0;
+
+                else if(m==".debug"){
+                    std::cout<<strmap["lpp_variable_list"].format()<<std::endl;
+                    std::cout<<f.toString()<<std::endl;
+                }else{
+                    std::cout<<strmap["lpp_unknown_internal_stmt"].format()<<std::endl;
+                }
+                continue;
+            }else{
+                cm=m;
+                while(!std::cin.eof()){
+                    size_t a=0,j=0;
+                    std::cin.clear();
+                    for(size_t i=0,z=0;i<cm.length();i++){
+                        if(cm[i]=='\\')z=!z;
+                        else if(cm[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}
+                        else if(cm[i]=='\''&&!z){if(a==2)a=1;else if(a==2)a=0;}
+                        else z=0;
+                        if(cm[i]=='#'&&a==0){
+                            while(i<cm.length()&&cm[i]!='\n')i++;
+                            i++;
+                        }
+                        if(cm[i]=='\n'&&(i>0||cm[i-1]==']'||cm[i-1]=='}'||cm[i-1]==')'))cm[i]=';';
+                        if((cm[i]=='['||cm[i]=='{'||cm[i]=='(')&&a==0)j++;
+                        if((cm[i]==']'||cm[i]=='}'||cm[i]==')')&&a==0)j--;
+                    }
+                    if(a!=0||j!=0||cm[cm.length()-1]==','){
+                        std::string temp;
+                        std::cout<<"... "<<std::flush;
+                        std::getline(std::cin,temp);
+                        cm+=temp;
+                    }else break;
+                    a=0;
+                    j=0;
+                }
+                if(std::cin.eof())return 0;
+            }
+            std::vector<std::string> w=Variable::code_split(cm);
+            L::L::Return_Value x;
+            for(size_t i=0;i<w.size();i++){
+                x=L::L(w[i]).eval(f);
+                f=x.scope;
+                if(x.tp==L::L::Return_Type::Throw_Return_Value){
+                    std::cout<<strmap["lpp_throw"].format({Variable::clearnull(w[i]),x.base.toString(),x.value.toString()})<<std::endl;
+                    x.value=Variable::var(nullptr,false);
+                }
+            }
+            std::cout<<"> "<<x.value.toString()<<std::endl;
+            m="";
+            cm="";
+        }
+    }else if(arg.size()>uselangfile){
+        std::ifstream s(arg[uselangfile]);
         if(!s.is_open()){
             std::cout<<strmap["lpp_failed_open_file"].format({"script"})<<std::endl;
             return 1;
@@ -180,77 +242,6 @@ int main(int argc,char** argv){
             }
         }
         return 0;
-    }else if(arg[uselangfile]=="terminal"){
-        std::cout<<strmap["lpp_loading_terminal"].format()<<std::endl;
-        std::cout<<strmap["lpp_terminal_welcome"].format()<<std::endl;
-        Variable::var f;
-        f.isConst=false;
-        f.tp=Variable::Object;
-        while(!std::cin.eof()){
-            std::string m,cm;
-            std::cout<<">>> "<<std::flush;
-            std::cin.clear();
-            std::getline(std::cin,m);
-            if(m[0]=='.'){//REPL COMMAND
-                if(m==".exit")return 0;
-                else if(m==".debug"){
-                    std::cout<<strmap["lpp_variable_list"].format()<<std::endl;
-                    std::cout<<f.toString()<<std::endl;
-                }else{
-                    std::cout<<strmap["lpp_unknown_internal_stmt"].format()<<std::endl;
-                }
-                continue;
-            }else{
-                cm=m;
-                while(!std::cin.eof()){
-                    size_t a=0,j=0;
-                    std::cin.clear();
-                    for(size_t i=0,z=0;i<cm.length();i++){
-                        if(cm[i]=='\\')z=!z;
-                        else if(cm[i]=='\"'&&!z){if(a==0)a=1;else if(a==1)a=0;}
-                        else if(cm[i]=='\''&&!z){if(a==2)a=1;else if(a==2)a=0;}
-                        else z=0;
-                        if(cm[i]=='#'&&a==0){
-                            while(i<cm.length()&&cm[i]!='\n')i++;
-                            i++;
-                        }
-                        if(cm[i]=='\n'&&(i>0||cm[i-1]==']'||cm[i-1]=='}'||cm[i-1]==')'))cm[i]=';';
-                        if((cm[i]=='['||cm[i]=='{'||cm[i]=='(')&&a==0)j++;
-                        if((cm[i]==']'||cm[i]=='}'||cm[i]==')')&&a==0)j--;
-                    }
-                    if(a!=0||j!=0||cm[cm.length()-1]==','){
-                        std::string temp;
-                        std::cout<<"... "<<std::flush;
-                        std::getline(std::cin,temp);
-                        cm+=temp;
-                    }else break;
-                    a=0;
-                    j=0;
-                }
-                if(std::cin.eof())return 0;
-            }
-            std::vector<std::string> w=Variable::code_split(cm);
-            L::L::Return_Value x;
-            for(size_t i=0;i<w.size();i++){
-                x=L::L(w[i]).eval(f);
-                f=x.scope;
-                if(x.tp==L::L::Return_Type::Throw_Return_Value){
-                    std::cout<<strmap["lpp_throw"].format({Variable::clearnull(w[i]),x.base.toString(),x.value.toString()})<<std::endl;
-                    x.value=Variable::var(nullptr,false);
-                }
-            }
-            std::cout<<"> "<<x.value.toString()<<std::endl;
-            m="";
-            cm="";
-        }
-    }else{
-        std::cout<<strmap["lpp_title"].format({VERSION_INFO})<<std::endl;
-        std::cout<<strmap["lpp_usage_information"].format()<<std::endl;
-        std::cout<<strmap["lpp_usage_argument_langfile"].format()<<std::endl;
-        std::cout<<strmap["lpp_usage_argument_help"].format()<<std::endl;
-        std::cout<<strmap["lpp_usage_argument_terminal"].format()<<std::endl;
-        std::cout<<strmap["lpp_usage_argument_file"].format()<<std::endl;
-        return 1;
     }
     return 0;
 }
