@@ -246,7 +246,7 @@ namespace Variable{
             else if(p[i]=='\"'||p[i]=='\'')a=colon_judge(p[i],a,z);
             else z=0;
             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-            else if(get_op_priority(std::string(1,p[i]))!=-1&&(i>0&&p[i-1]!='e')&&a==0&&j==0)flag=true;
+            else if((get_op_priority(std::string(1,p[i]))!=-1||p[i]=='=')&&(i>0&&p[i-1]!='e')&&a==0&&j==0)flag=true;
         }
         return flag;
     }
@@ -342,11 +342,6 @@ namespace Variable{
     } Fn_temp;
     typedef class var{
         bool needtoRemove;
-        std::string replaceAll(std::string strBig,const std::string& Stringrc,const std::string& strdst) const{
-            size_t pos=0,srclen=Stringrc.size(),dstlen=strdst.size();
-            while((pos=strBig.find(Stringrc,pos))!=std::string::npos)strBig.replace(pos,srclen,strdst),pos+=dstlen;
-            return strBig;
-        }
         public:
         bool isConst;
         std::string StringValue;
@@ -450,7 +445,7 @@ namespace Variable{
                 case Object:{
                     tmp="{";
                     for(std::map<std::string,var>::const_iterator it=ObjectValue.cbegin();it!=ObjectValue.cend();it++){
-                        tmp+="\""+replaceAll(it->first,"\"","\\\"")+"\":";
+                        tmp+=var(it->first).toString_nonconst()+":";
                         tmp+=it->second.toString();
                         if((++std::map<std::string,var>::const_iterator(it))!=ObjectValue.cend())tmp+=",";
                     }
@@ -701,28 +696,13 @@ namespace Variable{
                     return op.StringValue==StringValue;
                 }
                 case Array:{
-                    if(op.ArrayValue.size()!=ArrayValue.size())return false;
-                    for(size_t i=0;i<op.ArrayValue.size();i++){
-                        if(var(op.ArrayValue[i])!=var(ArrayValue[i]))return false;
-                    }
-                    return true;
+                    return ArrayValue==op.ArrayValue;
                 }
                 case Object:{
-                    for(std::map<std::string,var>::const_iterator i=op.ObjectValue.begin();i!=op.ObjectValue.end();i++){
-                        try{
-                            if(var(((std::map<std::string,var>)ObjectValue).at(i->first))!=var(i->second))return false;
-                        }catch(...){
-                            return false;
-                        }
-                    }
-                    return true;
+                    return ObjectValue==op.ObjectValue;
                 }
                 case Function:{
-                    if(FunctionValue.value.size()!=op.FunctionValue.value.size())return false;
-                    for(size_t i=0;i<FunctionValue.value.size();i++){
-                        if(FunctionValue.value[i]!=op.FunctionValue.value[i])return false;
-                    }
-                    return true;
+                    return FunctionValue.value==op.FunctionValue.value;
                 }
             }
             return false;
