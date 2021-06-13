@@ -189,7 +189,7 @@ namespace L{
             if(temp!="")visit.push_back(temp);
             return visit;
         }
-        bool isIdentifier(const std::string& x) const{
+        const bool isIdentifier(const std::string& x) const{
             if(x[0]=='_')return false;
             if(x=="arguments")return false;
             bool flag=false;
@@ -202,7 +202,7 @@ namespace L{
             }
             return true;
         }
-        std::string get_first_name(const std::string& p) const{
+        const std::string get_first_name(const std::string& p) const{
             std::string temp;
             for(size_t i=0,a=0,j=0,z=0;i<p.length();i++){
                 if(p[i]=='\\')z=!z;
@@ -218,8 +218,8 @@ namespace L{
             }
             return temp;
         }
-        bool isKeyword(const std::string& x) const{
-            static std::vector<std::string> keyword={
+        const bool isKeyword(const std::string& x) const{
+            const std::vector<const char*>& keyword={
                 "mov",
                 "var",
                 "if",
@@ -235,12 +235,12 @@ namespace L{
                 "const",
             };
             for(size_t i=0;i<keyword.size();i++){
-                if(keyword[i]==x)return true;
+                if(x==keyword[i])return true;
             }
             return false;
         }
         Return_Object get_var_index(const std::string& p,Return_Object object,Variable::var& scope,Variable::var& all_scope,Variable::var& this_scope,const size_t& count_dont_parse=0,const bool& nonewobject=false,const bool& startwiththis=false) const{
-            std::vector<std::string> visit=get_name_split(p);
+            const std::vector<std::string> visit=get_name_split(p);
             Object_Type fin=object.tp;
             Variable::var* now_object=&object.getValue();
             Variable::var now_const_object=object.getConstValue();
@@ -667,7 +667,8 @@ namespace L{
                         }
                 }else return exp;
             }//return var(exp);
-            if(exp.ExpressionValue.size()==1){
+            if(exp.ExpressionValue.size()==0)return Variable::var(nullptr);
+            if(exp.ExpressionValue.size()==1&&exp.ExpressionValue[0][0]!='-'){
                 Return_Object o=get_object(exp.ExpressionValue[0],scope,all_scope,this_scope,0,true);
                 if(o.tp==is_const_value||o.tp==is_native_function)return o.getConstValue();
                 else return o.getValue();
@@ -696,6 +697,7 @@ namespace L{
                     else if(op==">>")res=st[st.size()-1].rightmove_signed(st[st.size()-2]);
                     else if(op==">>>")res=st[st.size()-1].rightmove_unsigned(st[st.size()-2]);
                     else if(op=="<<")res=st[st.size()-1].leftmove(st[st.size()-2]);
+                    else throw 0;
                     if(op!="!"&&op!="~")st.pop_back();
                     st.pop_back();
                     st.push_back(res);
@@ -710,6 +712,10 @@ namespace L{
                             res=(Variable::var(nullptr,false));
                         }
                         st.pop_back();
+                        st.push_back(res);
+                    }else if((*i)[0]=='-'){
+                        //*-1
+                        res=Variable::var(exp_calc(Variable::parse((*i).substr(1)),scope,all_scope,this_scope)*-1);
                         st.push_back(res);
                     }else{
                         try{

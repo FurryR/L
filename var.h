@@ -49,6 +49,7 @@ namespace Variable{
         if(op=="~")return 0;
         if(op=="|")return 1;
         if(op==">>>")return 1;
+        if(op=="=")return 1;
         return -1;
     }
     std::string castExpression(const std::vector<std::string>& p){
@@ -118,7 +119,7 @@ namespace Variable{
         for(size_t i=0;i<ret.size();i++)fin.push_back(*(ret.crbegin()+i));
         return fin;
     }
-    std::vector<std::string> splitExpression(const std::string& p){
+    const std::vector<std::string> splitExpression(const std::string& p){
         size_t a=0;
         int f=0;
         bool x=false;
@@ -138,30 +139,19 @@ namespace Variable{
                     temp+=p[i];
                     break;
                 }
-                case '!':
                 case '>':
                 case '=':
                 case '&':
                 case '|':
-                case '~':
                 case '<':{
-                    if(a==0&&f==0&&(p[i-1]=='!'||p[i-1]=='>'||p[i-1]=='='||p[i-1]=='&'||p[i-1]=='|'||p[i-1]=='<'||((p[i-1]=='e'||p[i-1]=='E')&&p[i-2]>='0'&&p[i-2]<='9')))ret[ret.size()-1]+=p[i];
-                    else if(a==0&&f==0&&p.substr(i>4?i-5:0,5)!="const"&&((!x)||p[i]!='>')){
-                        if(temp!="")ret.push_back(temp);
-                        temp="";
-                        ret.push_back(std::string(1,p[i]));
-                    }else if(p[i]=='<'){
-                        x=true;
-                        temp+=p[i];
-                    }else if(p[i]=='>'&&x){
-                        x=false;
-                        temp+=p[i];
-                    }
-                    break;
-                }
-                case '-':{
-                    if(a==0&&f==0&&p[i-1]==p[i])ret[ret.size()-1]+=p[i];
-                    else if(a==0&&f==0&&(p[i+1]=='-'||(i>=1&&(p[i-1]!='+'&&p[i-1]!='-'&&p[i-1]!='*'&&p[i-1]!='/'&&p[i-1]!='%'&&((p[i-1]!='e'&&p[i-1]!='E')||((p[i-2]>='a'&&p[i-2]<='z')||(p[i-2]>='A'&&p[i-2]<='Z')||p[i-2]=='_')))))){
+                    if(a==0&&f==0&&(i==0||p[i-1]==p[i]||p[i-1]=='>'||p[i-1]=='<'||x||temp.substr(0,5)=="const")){
+                        if(temp!=""){
+                            if(x)ret[ret.size()-1]+=temp;else ret.push_back(temp);
+                            temp="";
+                        }
+                        ret[ret.size()-1]+=p[i];
+                        if(p[i]=='<'||p[i]=='>')x=!x;
+                    }else if(a==0&&f==0){
                         if(temp!=""){
                             ret.push_back(temp);
                             temp="";
@@ -170,11 +160,8 @@ namespace Variable{
                     }else temp+=p[i];
                     break;
                 }
-                case '+':
-                case '*':
-                case '/':
-                case '%':{
-                    if(a==0&&f==0&&p[i-1]==p[i])ret[ret.size()-1]+=p[i];
+                case '-':{
+                    if(a==0&&f==0&&(i==0||p[i-1]=='e'||p[i-1]=='E'))temp+=p[i];//ret[ret.size()-1]+=p[i];
                     else if(a==0&&f==0){
                         if(temp!=""){
                             ret.push_back(temp);
@@ -184,13 +171,22 @@ namespace Variable{
                     }else temp+=p[i];
                     break;
                 }
+                case '~':
+                case '!':
+                case '+':
+                case '*':
+                case '/':
+                case '%':{
+                    if(a==0&&f==0){
+                        if(temp!=""){
+                            ret.push_back(temp);
+                            temp="";
+                        }
+                        ret.push_back(std::string(1,p[i]));
+                    }else temp+=p[i];
+                    break;
+                }
                 case '(':{
-                    /*
-                    if(f!=0&&a==0){
-                        temp+=p[i];
-                        f++;
-                    }else if(a!=0)temp+=p[i];
-                    */
                     if(a==0&&f==0){
                         if(temp!="")ret.push_back(temp);
                         temp="";
@@ -200,13 +196,6 @@ namespace Variable{
                     break;
                 }
                 case ')':{
-                    /*
-                    if(f==1){
-                        ret.push_back(temp);
-                        temp="";
-                        f--;
-                    }else if(a!=0)temp+=p[i];
-                    */
                     if(a==0&&f==1){
                         if(temp!="")ret.push_back(temp);
                         temp="";
@@ -239,23 +228,23 @@ namespace Variable{
         if(temp!="")ret.push_back(temp);
         return ret;
     }
-    bool isExpression(const std::string& p){
-        bool flag=false;
+    const bool isExpression(std::string p){
+        if(p.substr(0,6)=="const<"&&p[p.length()-1]=='>')p=p.substr(6,p.length()-7);
         for(size_t i=0,j=0,a=0,z=0;i<p.length();i++){
             if(p[i]=='\\')z=!z;
             else if(p[i]=='\"'||p[i]=='\'')a=colon_judge(p[i],a,z);
             else z=0;
             if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-            else if((get_op_priority(std::string(1,p[i]))!=-1||p[i]=='=')&&(i>0&&p[i-1]!='e')&&a==0&&j==0)flag=true;
+            else if(get_op_priority(std::string(1,p[i]))!=-1&&i>0&&p[i-1]!='e'&&a==0&&j==0)return true;
         }
-        return flag;
+        return false;
     }
-    int Hex2Dec(const std::string& m){
+    const int Hex2Dec(const std::string& m){
         int l;
         l=stoi(m,0,16);
         return l;
     }
-    std::string Unicode2String(const std::string& str){
+    const std::string Unicode2String(const std::string& str){
         if(str=="")return "";
         std::wstring m(2,Hex2Dec("0x"+str));
         #ifdef FORCE_UTF8
@@ -275,22 +264,20 @@ namespace Variable{
         return ret;
         #endif
     }
-    std::string clearnull(const std::string& x){
+    const std::string clearnull(const std::string& x){
         std::string tmp;
         for(size_t i=0,a=0,z=0;i<x.length();i++){
             if(x[i]=='\\')z=!z;
             else if(x[i]=='\"'||x[i]=='\'')a=colon_judge(x[i],a,z);
             else z=0;
             if((x[i]=='\r'||x[i]=='\n'||x[i]=='\t')&&a==0)continue;
-            else if(x[i]==' '&&a==0&&(i<=0||(tmp[i-1]=='('||tmp[i-1]=='['||tmp[i-1]=='{'||tmp[i-1]==' '))&&(i<=0||!((tmp[i-1]>='a'&&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||(tmp[i-1]>='0'&&tmp[i-1]<='9')))){
-                //if(i<=0)continue;
-                //if((x[i-1]>='a'||x[i-1]<='z')&&(x[i-1]>='A'||x[i-1]<='Z'))tmp+=x[i];
+            else if(x[i]==' '&&a==0&&(i<=0||(tmp[i-1]=='('||tmp[i-1]=='['||tmp[i-1]=='{'||tmp[i-1]==' '))&&(i<=0||!((tmp[i-1]>='a'&&tmp[i-1]<='z')||(tmp[i-1]>='A'&&tmp[i-1]<='Z')||tmp[i-1]=='_'||(tmp[i-1]>='0'&&tmp[i-1]<='9')))){
                 continue;
             }else tmp+=x[i];
         }
         return tmp;
     }
-    std::vector<std::string> code_split(const std::string& x){
+    const std::vector<std::string> code_split(const std::string& x){
         std::string p;
         for(size_t i=0,a=0,z=0;i<x.length();i++){
             if(x[i]=='\\')z=!z;
@@ -574,6 +561,7 @@ namespace Variable{
             const var op=opx.convert(tp);
             switch(tp){
                 case Int:{
+                    if(op.IntValue==0)throw 0;//div by zero
                     return var(IntValue/op.IntValue);
                 }
                 default:{
@@ -586,6 +574,7 @@ namespace Variable{
             const var op=opx.convert(tp);
             switch(tp){
                 case Int:{
+                    if(op.IntValue==0)throw 0;//div by zero
                     return var((int)IntValue%(int)op.IntValue);
                 }
                 default:{
@@ -740,10 +729,10 @@ namespace Variable{
             return operator<(op)||operator==(op);
         }
         bool operator&&(const var& op) const{
-            return (operator==(var(1)))&&(op==var(1));
+            return (operator==(var(true)))&&(var(true)==op);
         }
         bool operator||(const var& op) const{
-            return (operator==(var(1)))||(op==var(1));
+            return (operator==(var(true)))||(var(true)==op);
         }
         bool operator!() const{
             if(tp==Boolean||tp==Int){
@@ -753,7 +742,7 @@ namespace Variable{
             return false;
         }
     } var;
-    std::string getTypeStr(var_tp x){
+    std::string getTypeStr(const var_tp& x){
         switch(x){
             case Null:return "null";
             case Int:return "int";
@@ -766,7 +755,7 @@ namespace Variable{
         }
         return "null";
     }
-    var_tp getStrType(std::string x){
+    const var_tp getStrType(const std::string& x){
         if(x=="null")return Null;
         if(x=="int")return Int;
         if(x=="boolean")return Boolean;
@@ -777,12 +766,8 @@ namespace Variable{
         //if(x=="expression")return Expression;
         return Null;
     }
-    var parse(std::string p,bool isc=false,bool forceisc=false){
-        p=clearnull(p);
-        if(p.substr(0,6)=="const<"&&p[p.length()-1]=='>'){
-            if(forceisc)return parse(p.substr(6,p.length()-7),isc);
-            return parse(p.substr(6,p.length()-7),true);
-        }
+    var parse(const std::string& x,bool isc=false,bool forceisc=false){
+        std::string p=clearnull(x);
         if(p=="")return var(nullptr,isc);
         try{
             if(isExpression(p)==false)throw 0;
@@ -797,6 +782,10 @@ namespace Variable{
                         if(p[i+1]>='0'&&p[i+1]<='9')continue;
                         else throw 0;
                     }
+                }
+                if(p.substr(0,6)=="const<"&&p[p.length()-1]=='>'){
+                    if(forceisc)return parse(p.substr(6,p.length()-7),isc);
+                    return parse(p.substr(6,p.length()-7),true);
                 }
                 if(p.find_first_of('.')!=std::string::npos||p.find_first_of('e')!=std::string::npos)std::stod(p);
                 else std::stoi(p,0,0);
