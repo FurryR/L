@@ -52,6 +52,17 @@ namespace Variable{
         if(op=="=")return 1;
         return -1;
     }
+    const bool isExpression(std::string p){
+        if(p.substr(0,6)=="const<"&&p[p.length()-1]=='>')p=p.substr(6,p.length()-7);
+        for(size_t i=0,j=0,a=0,z=0;i<p.length();i++){
+            if(p[i]=='\\')z=!z;
+            else if(p[i]=='\"'||p[i]=='\'')a=colon_judge(p[i],a,z);
+            else z=0;
+            if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
+            else if(get_op_priority(std::string(1,p[i]))!=-1&&i>0&&p[i-1]!='e'&&p[i-1]!='E'&&a==0&&j==0)return true;
+        }
+        return false;
+    }
     std::string castExpression(const std::vector<std::string>& p){
         std::string ret;
         std::vector<std::string> temp;
@@ -197,11 +208,21 @@ namespace Variable{
                 }
                 case ')':{
                     if(a==0&&f==1){
+                        if(isExpression(p)==false){
+                            ret[ret.size()-1]+=temp+")";
+                            temp="";
+                            f--;
+                            break;
+                        }
                         if(temp!="")ret.push_back(temp);
                         temp="";
                         f--;
                         ret.push_back(")");
-                    }else temp+=")";
+                    }else{
+                        if(temp!="")ret[ret.size()-1]+=temp;
+                        temp="";
+                        ret[ret.size()-1]+=")";
+                    }
                     break;
                 }
                 case '{':
@@ -228,17 +249,7 @@ namespace Variable{
         if(temp!="")ret.push_back(temp);
         return ret;
     }
-    const bool isExpression(std::string p){
-        if(p.substr(0,6)=="const<"&&p[p.length()-1]=='>')p=p.substr(6,p.length()-7);
-        for(size_t i=0,j=0,a=0,z=0;i<p.length();i++){
-            if(p[i]=='\\')z=!z;
-            else if(p[i]=='\"'||p[i]=='\'')a=colon_judge(p[i],a,z);
-            else z=0;
-            if((p[i]=='('||p[i]=='{'||p[i]=='[')&&a==0)j++;else if((p[i]==')'||p[i]=='}'||p[i]==']')&&a==0)j--;
-            else if(get_op_priority(std::string(1,p[i]))!=-1&&i>0&&p[i-1]!='e'&&a==0&&j==0)return true;
-        }
-        return false;
-    }
+    
     const int Hex2Dec(const std::string& m){
         int l;
         l=stoi(m,0,16);
