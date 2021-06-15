@@ -7,7 +7,7 @@ Copyright(c) 2021 nu11ptr team.
 #include"./parse.h"
 #include<iostream>
 #include<fstream>
-#define VERSION_INFO "1.3.0-r_release"
+#define VERSION_INFO "1.3.1-r_release"
 typedef class str_factory{
     std::string fmt;
     public:
