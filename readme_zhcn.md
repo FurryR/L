@@ -200,6 +200,17 @@ while 1,(
 return 0;#返回 0 。
 ```
 
+**new \[fn\](,arguments=null,back_to=discard)** : 将函数放到对象里然后执行它。
+例子\[1\]:
+
+```
+var fn,const<(
+    mov this["a"],arguments;
+)>;
+var a;
+new fn,1,a;
+#a = {"a":1}
+```
 **call \[fn\](,arguments=null,back_to=discard)** : 调用函数\[fn\]并设置变量 'arguments' 为\(arguments\),返回值赋值到back_to(它不能为一个常量值)。
 例子\[1\]:
 
@@ -230,6 +241,22 @@ throw 0;#它将抛出 0 。
 var errors_last;
 catch (throw "错误"),(mov errors_last,arguments);#errors_last="错误"
 ```
+### 内置成员
+使用 **[对象].[成员名]** 来访问内置成员。
+**keys : Array -> 可以在 Object 上使用** : 对象的键。
+**eval : Any -> 可以在 String 上使用** : 执行语句。
+**parse : Any -> 可以在 String 上使用*** : 计算表达式。
+**type : String -> 可以在 Any 上使用*** : 变量的类型。
+**length : Int -> 可以在 Array/String 上使用*** : Array/String的长度。
+**isConst : Boolean -> 可以在 Any 上使用*** : 获取变量的可操作性。
+**convert(new_type:string) : Any -> 可以在 Any 上使用*** : 转换变量到新类型。
+**push(elem:any) : Null -> 可以在 Array 上使用*** : 在Array后追加一个成员。
+**pop() : Null -> 可以在 Array 上使用*** : 从Array尾部弹出一个成员。
+**resize(new_size:int) Null -> 可以在 Array 上使用*** : 重新设置Array的大小。
+**insert(index:int,elem:any) Null -> 可以在 Array 上使用*** : 在index前插入一个成员。
+**join(str) Null -> 可以在 Array 上使用*** : 将Array内的所有成员放置在字符串内，用str作为分割。
+**toString() : String -> 可以在 Any 上使用*** : 获取变量的字符串表示。
+**substr(start,(end=-1)) String -> 可以在 String 上使用*** : 截取从start到end的字符串。
 
 ### 例子
 例子\[a+b\]:

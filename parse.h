@@ -232,6 +232,7 @@ namespace L{
                 "throw",
                 "catch",
                 "default",
+                "new",
                 "const",
             };
             for(size_t i=0;i<keyword.size();i++){
@@ -347,26 +348,6 @@ namespace L{
                             }
                         }
                         now_const_object=Variable::parse("(default eval)");
-                        fin=is_native_function;
-                    }else if(visit[i]=="_new_"){
-                        switch(fin){
-                            case is_pointer:{
-                                if(now_object->tp!=Variable::Function)throw member_not_exist;
-                                parent_object=now_object;
-                                isConst=false;
-                                break;
-                            }
-                            case is_const_value:{
-                                if(now_const_object.tp!=Variable::Function)throw member_not_exist;
-                                parent_const_object=now_const_object;
-                                isConst=true;
-                                break;
-                            }
-                            case is_native_function:{
-                                throw member_not_exist;
-                            }
-                        }
-                        now_const_object=Variable::parse("(default new)");
                         fin=is_native_function;
                     }else if(visit[i]=="_parse_"){
                         switch(fin){
@@ -1024,6 +1005,52 @@ namespace L{
                     }else break;
                 }
                 return Return_Value(*this,Expression_Calc_Value,Variable::var(nullptr),scope,all_scope,this_scope);
+            }else if(name=="new"){
+                if(args.size()<1||args.size()>3)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
+                Variable::var func;
+                try{
+                    func=exp_calc(Variable::parse(args[0]),scope,all_scope,this_scope);
+                    if(func.tp!=Variable::Function)throw 0;
+                }catch(...){
+                    return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
+                }
+                Variable::var temp_scope;
+                Variable::var temp_this_scope;
+                if(func.tp!=Variable::Function)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
+                temp_scope.isConst=false;
+                temp_scope.tp=Variable::Object;
+                temp_this_scope.isConst=false;
+                temp_this_scope.tp=Variable::Object;
+                if(args.size()>=2){
+                        try{
+                            temp_scope.ObjectValue["arguments"]=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
+                            temp_scope.ObjectValue["arguments"].isConst=true;
+                        }catch(...){
+                            return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
+                        }
+                }else temp_scope.ObjectValue["arguments"]=Variable::var();
+                for(size_t i=0;i<func.FunctionValue.value.size();i++){
+                    Return_Value res;
+                    res=L(func.FunctionValue.value[i]).eval(temp_scope,all_scope,temp_this_scope);
+                    if(res.tp==Function_Return_Value){
+                        break;
+                    }else if(res.tp==Throw_Return_Value){
+                        res.this_scope=this_scope;
+                        res.scope=scope;
+                        return res;
+                    }
+                }
+                if(args.size()==3){
+                    try{
+                        Return_Object x=get_object(args[2],scope,all_scope,this_scope);
+                        if(x.tp!=is_pointer||x.getValue().isConst==true)throw 0;
+                        x.getValue()=temp_this_scope;
+                        //x.getValue().isConst=false;
+                    }catch(...){
+                        return Return_Value(*this,Throw_Return_Value,Variable::var("VariableError"),scope,all_scope,this_scope);
+                    }
+                }
+                return Return_Value(*this,Expression_Calc_Value,temp_this_scope,scope,all_scope,this_scope);
             }else if(name=="call"){
                 if(args.size()<1||args.size()>3)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                 Return_Object fn_native;
@@ -1123,39 +1150,6 @@ namespace L{
                         }
                     }else if(member=="toString"){
                         ret=Variable::var(fn_native.getConstParent().toString_nonconst());
-                    }else if(member=="new"){
-                        Variable::var temp_scope;
-                        Variable::var temp_this_scope;
-                        Variable::var func=fn_native.getConstParent();
-                        if(func.tp!=Variable::Function)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
-                        temp_scope.isConst=false;
-                        temp_scope.tp=Variable::Object;
-                        temp_this_scope.isConst=false;
-                        temp_this_scope.tp=Variable::Object;
-                        if(args.size()>=2){
-                            try{
-                                temp_scope.ObjectValue["arguments"]=exp_calc(Variable::parse(args[1]),scope,all_scope,this_scope);
-                                temp_scope.ObjectValue["arguments"].isConst=true;
-                            }catch(...){
-                                return Return_Value(*this,Throw_Return_Value,Variable::var("ExpressionError"),scope,all_scope,this_scope);
-                            }
-                        }else temp_scope.ObjectValue["arguments"]=Variable::var();
-                        for(size_t i=0;i<func.FunctionValue.value.size();i++){
-                            Return_Value res;
-                            res=L(func.FunctionValue.value[i]).eval(temp_scope,all_scope,temp_this_scope);
-                            if(res.tp==Function_Return_Value){
-                                if(args.size()==3){
-                                    ret=temp_this_scope;
-                                    break;
-                                }
-                                return Return_Value(*this,Expression_Calc_Value,res.value,scope,all_scope,this_scope);
-                            }else if(res.tp==Throw_Return_Value){
-                                res.this_scope=this_scope;
-                                res.scope=scope;
-                                return res;
-                            }
-                        }
-                        ret=temp_this_scope;
                     }else if(member=="insert"){
                         if(args.size()<2)return Return_Value(*this,Throw_Return_Value,Variable::var("EvalError"),scope,all_scope,this_scope);
                         try{

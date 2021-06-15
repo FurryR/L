@@ -129,7 +129,6 @@ int main(int argc,char** argv){
             std::getline(std::cin,m);
             if(m[0]=='.'){//REPL COMMAND
                 if(m==".exit")return 0;
-
                 else if(m==".debug"){
                     std::cout<<strmap["lpp_variable_list"].format()<<std::endl;
                     std::cout<<f.toString()<<std::endl;
@@ -138,7 +137,7 @@ int main(int argc,char** argv){
                 }
                 continue;
             }else{
-                cm=m;
+                cm=m+"\n";
                 while(!std::cin.eof()){
                     size_t a=0,j=0;
                     std::cin.clear();
@@ -151,7 +150,7 @@ int main(int argc,char** argv){
                             while(i<cm.length()&&cm[i]!='\n')i++;
                             i++;
                         }
-                        if(cm[i]=='\n'&&(i>0||cm[i-1]==']'||cm[i-1]=='}'||cm[i-1]==')'))cm[i]=';';
+                        if(cm[i]=='\n'&&(i>0&&cm[i-1]!='['&&cm[i-1]!='{'&&cm[i-1]!='('&&cm[i-1]!=';'))cm[i]=';';
                         if((cm[i]=='['||cm[i]=='{'||cm[i]=='(')&&a==0)j++;
                         if((cm[i]==']'||cm[i]=='}'||cm[i]==')')&&a==0)j--;
                     }
@@ -159,7 +158,7 @@ int main(int argc,char** argv){
                         std::string temp;
                         std::cout<<"... "<<std::flush;
                         std::getline(std::cin,temp);
-                        cm+=temp;
+                        cm+=temp+"\n";
                     }else break;
                     a=0;
                     j=0;
@@ -199,7 +198,7 @@ int main(int argc,char** argv){
         while(!s.eof()){
             std::string m,cm;
             std::getline(s,m);
-            cm=m;
+            cm=m+"\n";
             while(!s.eof()){
                 size_t a=0,j=0;
                 for(size_t i=0,z=0;i<cm.length();i++){
@@ -211,14 +210,14 @@ int main(int argc,char** argv){
                         while(i<cm.length()&&cm[i]!='\n')i++;
                         i++;
                     }
-                    if(cm[i]=='\n'&&(i>0||cm[i-1]==']'||cm[i-1]=='}'||cm[i-1]==')'))cm[i]=';';
+                    if(cm[i]=='\n'&&(i<=0||(cm[i-1]!='['&&cm[i-1]!='{'&&cm[i-1]!='('&&cm[i-1]!=';')))cm[i]=';';
                     if((cm[i]=='['||cm[i]=='{'||cm[i]=='(')&&a==0)j++;
                     if((cm[i]==']'||cm[i]=='}'||cm[i]==')')&&a==0)j--;
                 }
                 if(a!=0||j!=0||cm[cm.length()-1]==','){
                     std::string temp;
                     std::getline(s,temp);
-                    cm+=temp;
+                    cm+=temp+"\n";
                 }else break;
             }
             if(s.eof())break;

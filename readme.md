@@ -203,6 +203,18 @@ sample\[1\]:
 return 0;#returns 0.
 ```
 
+**new \[fn\](,arguments=null,back_to=discard)** : Puts the function in the object and execute it.
+sample\[1\]:
+
+```
+var fn,const<(
+    mov this["a"],arguments;
+)>;
+var a;
+new fn,1,a;
+#a = {"a":1}
+```
+
 **call \[fn\](,arguments=null,back_to=discard)** : Calls function \[fn\] and set variable 'arguments' to \(arguments\),return value to \(back_to\)(it CANNOT be a const value).
 sample\[1\]:
 
@@ -233,6 +245,23 @@ sample\[1\]:
 var errors_last;
 catch (throw "error"),(mov errors_last,arguments);#errors_last="error"
 ```
+
+### Native Members
+using **[object].[the name of the member]** to access the Native Members.
+**keys : Array -> can use on Object** : get the object's keys.
+**eval : Any -> can use on String** : execute the statement.
+**parse : Any -> can use on String** : execute the expression.
+**type : String -> can use on Any** : get the variable's type.
+**length : Int -> can use on Array/String** : get the string/array's length.
+**isConst : Boolean -> can use on Any** : get the variable's operability.
+**convert(new_type:string) : Any -> can use on Any** : convert variable to new type.
+**push(elem:any) : Null -> can use on Array** : push a element to the array.
+**pop() : Null -> can use on Array** : pop a element from the array.
+**resize(new_size:int) Null -> can use on Array** : resize the array.
+**insert(index:int,elem:any) Null -> can use on Array** : insert a element before the index.
+**join(str) Null -> can use on Array** :  put all the elements in the array into a string,split with str.
+**toString() : String -> can use on Any** : get the variable's string.
+**substr(start,(end=-1)) String -> can use on String** : intercept the string from start to end.
 
 ### Sample
 sample\[a+b\]:
